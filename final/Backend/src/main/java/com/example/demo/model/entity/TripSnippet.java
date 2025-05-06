@@ -36,5 +36,4 @@ public class TripSnippet {
     @OneToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="no")
     private Attraction attraction;
-
 }
