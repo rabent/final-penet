@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -32,6 +33,10 @@ public class TripSnippet {
 
     @Column(name = "schedule", length = 200, nullable = false)
     private String schedule;
+
+    @ManyToOne(fetch = FetchType.LAZY) 
+    @JoinColumn(name="plan_id")
+    private TripPlan tripPlan;
 
     @OneToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="no")
