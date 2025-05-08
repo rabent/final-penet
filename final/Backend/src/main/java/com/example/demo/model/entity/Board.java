@@ -37,10 +37,9 @@ public class Board {
     @JoinColumn(name = "user_id", nullable = true) // 외래 키 컬럼명
     private User user;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_id")
+    @OneToMany(mappedBy="board",fetch = FetchType.LAZY)
     @Singular
-    private List<B_image> images=new ArrayList<>();
+    private List<BImage> images;
     
     @Column(name = "title", length = 30, nullable = false)
     private String title;
@@ -50,4 +49,9 @@ public class Board {
     
     @Column(name = "hit")
     private Integer hit;
+
+    public void addImage(BImage image) {
+        this.images.add(image);
+        image.setBoard(this);
+    }
 }

@@ -50,9 +50,19 @@ public class User {
 
     @OneToMany(mappedBy = "user", orphanRemoval = false)
     @Singular
-    private List<Board> boards = new ArrayList<>();
+    private List<Board> boards;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL ,orphanRemoval = true)
     @Singular
-    private List<TripPlan> plans = new ArrayList<>();
+    private List<TripPlan> plans;
+
+    public void addBoard(Board board) {
+        this.boards.add(board);
+        board.setUser(this);
+    }
+
+    public void addPlan(TripPlan plan) {
+        this.plans.add(plan);
+        plan.setUser(this);
+    }
 } 
