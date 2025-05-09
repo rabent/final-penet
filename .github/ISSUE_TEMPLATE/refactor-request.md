@@ -1,6 +1,6 @@
 ---
 name: Refactor request
-about: 수정할 부분 간단하게 설명
+about: 수정할 부분과 방향성
 title: ''
 labels: ''
 assignees: ''
