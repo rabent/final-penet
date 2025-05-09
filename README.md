@@ -1,2 +1,2 @@
-# fianl-penet
+# final-penet
 SSAFY final penet
