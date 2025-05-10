@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: 간단히 설명
+about: 버그 관련 이슈
 title: ''
 labels: ''
 assignees: ''

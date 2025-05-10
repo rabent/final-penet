@@ -1,5 +1,6 @@
 package com.example.demo.model.entity;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +50,9 @@ public class Board {
     
     @Column(name = "hit")
     private Integer hit;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
     public void addImage(BImage image) {
         this.images.add(image);
