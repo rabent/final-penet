@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: 기능 간단하게 설명
+about: 추가해야 할 기능 설명
 title: ''
 labels: ''
 assignees: ''
