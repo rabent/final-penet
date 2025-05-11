@@ -40,6 +40,9 @@ public class TripPlan {
     @Singular
     private List<TripSnippet> snippets;
 
+    @Column(name="plan_name", length = 50, nullable=false)
+    private String planName;
+
     @Column(name = "plan", length = 200, nullable = false)
     private String plan;
 

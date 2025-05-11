@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BoardListDto {
+public class BoardSummaryDto {
     
     // 게시글 ID
     private Integer id;
