@@ -13,7 +13,8 @@
         </nav>
       </div>
       <div class="header-right">
-        <router-link to="/login" class="login-btn">로그인</router-link>
+        <router-link to="/login" class="auth-btn login-btn">로그인</router-link>
+        <router-link to="/register" class="auth-btn register-btn">회원가입</router-link>
       </div>
     </div>
   </header>
@@ -101,9 +102,12 @@ defineOptions({
   width: 100%;
 }
 
-.login-btn {
-  background-color: #3498db;
-  color: white;
+.header-right {
+  display: flex;
+  gap: 10px;
+}
+
+.auth-btn {
   padding: 8px 20px;
   border-radius: 4px;
   text-decoration: none;
@@ -111,7 +115,21 @@ defineOptions({
   transition: background-color 0.3s;
 }
 
+.login-btn {
+  background-color: #3498db;
+  color: white;
+}
+
 .login-btn:hover {
   background-color: #2980b9;
+}
+
+.register-btn {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.register-btn:hover {
+  background-color: #27ae60;
 }
 </style>
