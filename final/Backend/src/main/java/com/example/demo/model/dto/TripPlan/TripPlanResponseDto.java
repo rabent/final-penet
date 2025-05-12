@@ -1,7 +1,8 @@
-package com.example.demo.model.dto;
+package com.example.demo.model.dto.TripPlan;
 
 import java.util.List;
 
+import com.example.demo.model.dto.TPsnippet.TPsnippetSummaryDto;
 import com.example.demo.model.entity.TripPlan;
 
 import lombok.AllArgsConstructor;

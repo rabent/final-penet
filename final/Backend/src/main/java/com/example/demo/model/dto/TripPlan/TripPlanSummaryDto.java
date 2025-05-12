@@ -1,4 +1,4 @@
-package com.example.demo.model.dto;
+package com.example.demo.model.dto.TripPlan;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -30,11 +30,11 @@ public class User {
     @Column(name = "user_id")
     private Integer id;
     
-    @Column(name = "password", length = 15, nullable = false)
-    private String password;
-    
     @Column(name = "name", length = 15, nullable = false)
     private String name;
+    
+    @Column(name = "password", length = 15, nullable = false)
+    private String password;
     
     @Column(name = "role", length = 10, nullable = false)
     private String role;

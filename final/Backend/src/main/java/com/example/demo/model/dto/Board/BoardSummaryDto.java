@@ -20,7 +20,7 @@ public class BoardSummaryDto {
     // 조회수
     private Integer hit;
     
-    // 작성자 정보 (필요한 경우)
+    // 작성자 정보 (username으로 별도로 처리 필요)
     private String user;
     
     // 생성 일시
