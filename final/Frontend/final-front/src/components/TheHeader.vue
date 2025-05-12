@@ -1,4 +1,4 @@
-<!-- Header.vue (Vue 3 버전) -->
+<!-- TheHeader.vue (Vue 3 버전) -->
 <template>
   <header class="header">
     <div class="header-container">
@@ -20,7 +20,9 @@
 </template>
 
 <script setup>
-// 필요한 경우 여기에 추가 로직 작성
+defineOptions({
+  name: 'TheHeader'
+})
 </script>
 
 <style scoped>
