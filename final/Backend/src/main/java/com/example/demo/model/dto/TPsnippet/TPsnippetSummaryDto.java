@@ -15,5 +15,5 @@ public class TPsnippetSummaryDto {
 
     private String attractionName;
 
-    private Integer price;
+    private String price;
 }

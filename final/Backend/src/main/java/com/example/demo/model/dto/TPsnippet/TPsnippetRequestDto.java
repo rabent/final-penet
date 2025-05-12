@@ -1,9 +1,8 @@
 package com.example.demo.model.dto.TPsnippet;
 
 
-import com.example.demo.model.dto.Attraction.AttractionSummaryDto;
-import com.example.demo.model.entity.Attraction;
 import com.example.demo.model.entity.TripSnippet;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;

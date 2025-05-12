@@ -1,4 +1,6 @@
-package com.example.demo.model.dto;
+package com.example.demo.model.dto.TripPlan;
+
+import com.example.demo.model.entity.TripPlan;
 
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -16,4 +18,13 @@ public class TripPlanUpdateDto {
 
     @Size(max=200)
     private String plan;
+
+    public void updateEntity(TripPlan tripPlan) {
+        if (this.planName != null) {
+            tripPlan.setPlanName(this.planName);
+        }
+        if (this.plan != null) {
+            tripPlan.setPlan(this.plan);
+        }
+    }
 }
