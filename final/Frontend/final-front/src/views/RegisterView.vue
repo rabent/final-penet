@@ -4,6 +4,43 @@
       <h2>회원가입</h2>
       <form @submit.prevent="handleRegister" class="register-form">
         <div class="form-group">
+          <label for="email">이메일 (아이디)</label>
+          <input
+            type="email"
+            id="email"
+            v-model="registerForm.email"
+            required
+            placeholder="이메일을 입력하세요"
+          />
+        </div>
+
+        
+        <div class="form-group">
+            <label for="password">비밀번호</label>
+            <input
+            type="password"
+            id="password"
+            v-model="registerForm.password"
+            required
+            placeholder="비밀번호를 입력하세요"
+            />
+        </div>
+        
+        <div class="form-group">
+            <label for="passwordConfirm">비밀번호 확인</label>
+            <input
+            type="password"
+            id="passwordConfirm"
+            v-model="passwordConfirm"
+            required
+            placeholder="비밀번호를 다시 입력하세요"
+            />
+            <span class="password-match" :class="{ 'not-match': !isPasswordMatch && passwordConfirm }">
+                {{ passwordMatchMessage }}
+            </span>
+        </div>
+        
+        <div class="form-group">
           <label for="name">이름</label>
           <input
             type="text"
@@ -15,44 +52,8 @@
         </div>
         
         <div class="form-group">
-          <label for="password">비밀번호</label>
-          <input
-            type="password"
-            id="password"
-            v-model="registerForm.password"
-            required
-            placeholder="비밀번호를 입력하세요"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="passwordConfirm">비밀번호 확인</label>
-          <input
-            type="password"
-            id="passwordConfirm"
-            v-model="passwordConfirm"
-            required
-            placeholder="비밀번호를 다시 입력하세요"
-          />
-          <span class="password-match" :class="{ 'not-match': !isPasswordMatch && passwordConfirm }">
-            {{ passwordMatchMessage }}
-          </span>
-        </div>
-
-        <div class="form-group">
-          <label for="email">이메일</label>
-          <input
-            type="email"
-            id="email"
-            v-model="registerForm.email"
-            required
-            placeholder="이메일을 입력하세요"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="address">주소</label>
-          <input
+            <label for="address">주소</label>
+            <input
             type="text"
             id="address"
             v-model="registerForm.address"
