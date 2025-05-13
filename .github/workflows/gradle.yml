@@ -13,23 +13,23 @@ jobs:
         working-directory: final/Backend  # 모든 run 명령에 대한 기본 작업 디렉토리 설정
 
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: gradle
-
-      # 디버깅을 위한 파일 구조 확인
-      - name: List directory contents
-        run: ls -la
-
-      # gradlew 파일에 실행 권한 부여
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      # Gradle 테스트 실행
-      - name: Build and Test with Gradle
-        run: ./gradlew test
+    - uses: actions/checkout@v3
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+    
+    # 디버깅을 위한 파일 구조 확인
+    - name: List directory contents
+      run: ls -la
+    
+    # gradlew 파일에 실행 권한 부여
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    
+    # Gradle 테스트 실행
+    - name: Build and Test with Gradle
+      run: ./gradlew test
