@@ -36,7 +36,7 @@ public class TripPlan {
     @JoinColumn(name = "user_id") // 외래 키 컬럼명
     private User user;
 
-    @OneToMany(mappedBy="tripPlan",fetch = FetchType.EAGER)
+    @OneToMany(mappedBy="plan",fetch = FetchType.EAGER)
     @Singular
     private List<TripSnippet> snippets;
 
@@ -48,6 +48,6 @@ public class TripPlan {
 
     public void addSnippet(TripSnippet snippet) {
         this.snippets.add(snippet);
-        snippet.setTripPlan(this);
+        snippet.setPlan(this);
     }
 }

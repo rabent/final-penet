@@ -97,7 +97,7 @@ class TPsnippetRepositoryTest {
 
         // 테스트 여행 스니펫 생성 (price가 String으로 변경됨, schedule 필드 추가)
         snippet1 = TripSnippet.builder()
-                .tripPlan(tripPlan1)
+                .plan(tripPlan1)
                 .attraction(attraction1)
                 .price("10000원")
                 .schedule("첫째날 오전 10시")
@@ -105,7 +105,7 @@ class TPsnippetRepositoryTest {
         entityManager.persist(snippet1);
 
         snippet2 = TripSnippet.builder()
-                .tripPlan(tripPlan1)
+                .plan(tripPlan1)
                 .attraction(attraction2)
                 .price("15000원")
                 .schedule("둘째날 오후 2시")
@@ -113,7 +113,7 @@ class TPsnippetRepositoryTest {
         entityManager.persist(snippet2);
 
         snippet3 = TripSnippet.builder()
-                .tripPlan(tripPlan2)
+                .plan(tripPlan2)
                 .attraction(attraction3)
                 .price("5000원")
                 .schedule("첫째날 오전 9시")
@@ -121,7 +121,7 @@ class TPsnippetRepositoryTest {
         entityManager.persist(snippet3);
 
         snippet4 = TripSnippet.builder()
-                .tripPlan(tripPlan2)
+                .plan(tripPlan2)
                 .attraction(attraction1) // 제주도 관광지지만 부산 여행 계획에 포함
                 .price("12000원")
                 .schedule("둘째날 오전 11시")
@@ -132,11 +132,11 @@ class TPsnippetRepositoryTest {
     }
 
     @Test
-    @DisplayName("특정 planId에 해당하는 모든 스니펫 조회")
+    @DisplayName("특정 plan에 해당하는 모든 스니펫 조회")
     void findByPlanId() {
         // when
-        List<TripSnippet> snippetsPlan1 = tripSnippetRepository.findByPlanId(tripPlan1.getId());
-        List<TripSnippet> snippetsPlan2 = tripSnippetRepository.findByPlanId(tripPlan2.getId());
+        List<TripSnippet> snippetsPlan1 = tripSnippetRepository.findByPlan(tripPlan1);
+        List<TripSnippet> snippetsPlan2 = tripSnippetRepository.findByPlan(tripPlan2);
 
         // then
         assertThat(snippetsPlan1).hasSize(2);
@@ -174,9 +174,7 @@ class TPsnippetRepositoryTest {
         // 첫 번째 계획의 스니펫 요약 내용 확인
         assertThat(summaryPlan1.stream().map(TPsnippetSummaryDto::getAttractionName).toList())
                 .containsExactlyInAnyOrder("성산일출봉", "우도");
-        
-        // price 필드가 DTO에서는 Integer이지만 엔티티에서는 String인 경우를 처리하기 위한 검증 방법
-        // 실제 구현에 따라 이 부분은 조정이 필요할 수 있습니다.
+
         boolean hasPricesForPlan1 = summaryPlan1.stream()
                 .allMatch(dto -> {
                     String price = dto.getPrice();
@@ -197,10 +195,16 @@ class TPsnippetRepositoryTest {
     }
 
     @Test
-    @DisplayName("없는 계획 ID로 조회했을 때 빈 목록 반환")
+    @DisplayName("없는 tripplan으로 조회했을 때 빈 목록 반환")
     void findByNonExistingPlanId() {
         // when
-        List<TripSnippet> snippets = tripSnippetRepository.findByPlanId(9999);
+        TripPlan plan=TripPlan.builder()
+                .planName("없는 여행")
+                .plan("없는 여행 계획")
+                .user(user)
+                .build();
+        entityManager.persist(plan);
+        List<TripSnippet> snippets = tripSnippetRepository.findByPlan(plan);
 
         // then
         assertThat(snippets).isEmpty();

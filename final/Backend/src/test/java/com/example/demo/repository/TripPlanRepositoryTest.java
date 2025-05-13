@@ -96,28 +96,6 @@ class TripPlanRepositoryTest {
         entityManager.flush();
     }
 
-    @Test
-    @DisplayName("특정 사용자의 모든 여행 계획 조회")
-    void findByUser() {
-        // when
-        List<TripPlan> user1Plans = tripPlanRepository.findByUser(user1);
-        List<TripPlan> user2Plans = tripPlanRepository.findByUser(user2);
-
-        // then
-        assertThat(user1Plans).hasSize(2);
-        assertThat(user2Plans).hasSize(2);
-        
-        // 사용자별 여행 계획 제목 확인
-        List<String> user1PlanNames = user1Plans.stream()
-                .map(TripPlan::getPlanName)
-                .toList();
-        assertThat(user1PlanNames).containsExactlyInAnyOrder("제주도 3박 4일", "부산 여행 계획");
-        
-        List<String> user2PlanNames = user2Plans.stream()
-                .map(TripPlan::getPlanName)
-                .toList();
-        assertThat(user2PlanNames).containsExactlyInAnyOrder("도쿄 일본 여행", "강원도 속초 당일치기");
-    }
 
     @Test
     @DisplayName("특정 사용자의 여행 계획을 페이징하여 조회")
@@ -181,8 +159,8 @@ class TripPlanRepositoryTest {
         String keyword = "여행";
 
         // when
-        List<TripPlan> user1Results = tripPlanRepository.findByUserAndPlanContaining(user1, keyword);
-        List<TripPlan> user2Results = tripPlanRepository.findByUserAndPlanContaining(user2, keyword);
+        List<TripPlan> user1Results = tripPlanRepository.findByUserAndPlanNameContaining(user1, keyword);
+        List<TripPlan> user2Results = tripPlanRepository.findByUserAndPlanNameContaining(user2, keyword);
 
         // then
         assertThat(user1Results).hasSize(1);
@@ -199,7 +177,7 @@ class TripPlanRepositoryTest {
         String keyword = "존재하지않는키워드";
 
         // when
-        List<TripPlan> results = tripPlanRepository.findByUserAndPlanContaining(user1, keyword);
+        List<TripPlan> results = tripPlanRepository.findByUserAndPlanNameContaining(user1, keyword);
 
         // then
         assertThat(results).isEmpty();

@@ -36,9 +36,9 @@ public class TripSnippet {
 
     @ManyToOne(fetch = FetchType.LAZY) 
     @JoinColumn(name="plan_id")
-    private TripPlan tripPlan;
+    private TripPlan plan;
 
-    @OneToOne(fetch=FetchType.LAZY)
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="no")
     private Attraction attraction;
 }
