@@ -3,12 +3,18 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 // 홈 페이지는 즉시 로드
 import Home from '../views/HomeView.vue'
+import Login from '../views/LoginView.vue'
 
 const routes = [
   {
     path: '/',
     name: 'Home',
     component: Home
+  }
+  ,{
+    path: '/login',
+    name: 'Login',
+    component: Login
   }
   // ,{
   //   path: '/attractions',
@@ -25,11 +31,6 @@ const routes = [
   //   path: '/trip-plan',
   //   name: 'TripPlan',
   //   component: () => import(/* webpackChunkName: "trip-plan" */ '../views/TripPlan.vue')
-  // },
-  // {
-  //   path: '/login',
-  //   name: 'Login',
-  //   component: () => import(/* webpackChunkName: "login" */ '../views/Login.vue')
   // }
 ]
 

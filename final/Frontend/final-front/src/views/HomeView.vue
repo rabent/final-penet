@@ -54,63 +54,59 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'Home',
-  data() {
-    return {
-      featuredDestinations: [
-        {
-          id: 'jeju',
-          name: '제주도',
-          description: '아름다운 해변과 자연 경관을 자랑하는 한국의 대표적인 휴양지',
-          image: 'https://via.placeholder.com/400x300?text=제주도'
-        },
-        {
-          id: 'busan',
-          name: '부산',
-          description: '해운대 해변과 활기찬 시장이 있는 한국 제2의 도시',
-          image: 'https://via.placeholder.com/400x300?text=부산'
-        },
-        {
-          id: 'gyeongju',
-          name: '경주',
-          description: '신라 시대의 역사적 유적이 풍부한 역사 문화 도시',
-          image: 'https://via.placeholder.com/400x300?text=경주'
-        },
-        {
-          id: 'seoul',
-          name: '서울',
-          description: '전통과 현대가 공존하는 대한민국의 수도',
-          image: 'https://via.placeholder.com/400x300?text=서울'
-        }
-      ],
-      recentPosts: [
-        {
-          id: 1,
-          title: '제주도 3박 4일 여행 후기',
-          author: '여행자123',
-          date: '2025-05-05',
-          excerpt: '제주도의 숨겨진 명소들과 현지인 맛집을 소개합니다.'
-        },
-        {
-          id: 2,
-          title: '혼자 떠나는 부산 여행 가이드',
-          author: '솔로트래블러',
-          date: '2025-05-03',
-          excerpt: '혼자서도 충분히 즐길 수 있는 부산 여행 코스를 정리했습니다.'
-        },
-        {
-          id: 3,
-          title: '가족과 함께하는 경주 여행 계획',
-          author: '행복한가족',
-          date: '2025-05-01',
-          excerpt: '아이들과 함께 역사 탐방을 할 수 있는 경주 여행 계획을 공유합니다.'
-        }
-      ]
-    }
+<script setup>
+import { ref } from 'vue'
+
+const featuredDestinations = ref([
+  {
+    id: 'jeju',
+    name: '제주도',
+    description: '아름다운 해변과 자연 경관을 자랑하는 한국의 대표적인 휴양지',
+    image: 'https://via.placeholder.com/400x300?text=제주도'
+  },
+  {
+    id: 'busan',
+    name: '부산',
+    description: '해운대 해변과 활기찬 시장이 있는 한국 제2의 도시',
+    image: 'https://via.placeholder.com/400x300?text=부산'
+  },
+  {
+    id: 'gyeongju',
+    name: '경주',
+    description: '신라 시대의 역사적 유적이 풍부한 역사 문화 도시',
+    image: 'https://via.placeholder.com/400x300?text=경주'
+  },
+  {
+    id: 'seoul',
+    name: '서울',
+    description: '전통과 현대가 공존하는 대한민국의 수도',
+    image: 'https://via.placeholder.com/400x300?text=서울'
   }
-}
+])
+
+const recentPosts = ref([
+  {
+    id: 1,
+    title: '제주도 3박 4일 여행 후기',
+    author: '여행자123',
+    date: '2025-05-05',
+    excerpt: '제주도의 숨겨진 명소들과 현지인 맛집을 소개합니다.'
+  },
+  {
+    id: 2,
+    title: '혼자 떠나는 부산 여행 가이드',
+    author: '솔로트래블러',
+    date: '2025-05-03',
+    excerpt: '혼자서도 충분히 즐길 수 있는 부산 여행 코스를 정리했습니다.'
+  },
+  {
+    id: 3,
+    title: '가족과 함께하는 경주 여행 계획',
+    author: '행복한가족',
+    date: '2025-05-01',
+    excerpt: '아이들과 함께 역사 탐방을 할 수 있는 경주 여행 계획을 공유합니다.'
+  }
+])
 </script>
 
 <style scoped>
