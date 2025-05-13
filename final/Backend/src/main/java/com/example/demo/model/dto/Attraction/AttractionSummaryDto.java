@@ -10,6 +10,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AttractionSummaryDto {
+    private Integer no;
+
     private String title;
 
     private String firstImage1;

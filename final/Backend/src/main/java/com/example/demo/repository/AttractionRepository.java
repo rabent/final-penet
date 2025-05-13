@@ -15,10 +15,10 @@ public interface AttractionRepository extends JpaRepository<Attraction, Integer>
      /**
      * 페이징 처리된 관광지 요약 정보를 조회하는 메서드
      */
-    @Query("SELECT new com.example.demo.model.dto.Attraction.AttractionSummaryDto(a.title, a.firstImage1, a.addr1, a.tel) FROM Attraction a")
+    @Query("SELECT new com.example.demo.model.dto.Attraction.AttractionSummaryDto(a.no, a.title, a.firstImage1, a.addr1, a.tel) FROM Attraction a")
     Page<AttractionSummaryDto> findAttractionSummaries(Pageable pageable);
     
-    @Query("SELECT new com.example.demo.model.dto.Attraction.AttractionSummaryDto(a.title, a.firstImage1, a.addr1, a.tel) " +
+    @Query("SELECT new com.example.demo.model.dto.Attraction.AttractionSummaryDto(a.no, a.title, a.firstImage1, a.addr1, a.tel) " +
            "FROM Attraction a " +
            "WHERE (:areaCode IS NULL OR a.areaCode = :areaCode) " +
            "AND (:sigunCode IS NULL OR a.siGunguCode = :sigunCode) " +
