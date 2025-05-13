@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import com.example.demo.model.entity.User;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Integer> {
+public interface UserRepository extends JpaRepository<User, Integer> {//별도로 쿼리 안쓰고 entity->dto dto->entity 사용
     // 이메일로 사용자 찾기
     Optional<User> findByEmail(String email);
     
