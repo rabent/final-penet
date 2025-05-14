@@ -73,8 +73,8 @@ public class BoardService {
      */
     public Page<BoardSummaryDto> getBoardsByUser(Integer userId, int page) {
         Pageable pageable = PageRequest.of(page, DEFAULT_PAGE_SIZE, Sort.by("createdAt").descending());
-        Optional<User> user=userRepository.findById(userId);
-        return boardRepository.findByUser(user.orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다.")), pageable);
+        User user=userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        return boardRepository.findByUser(user, pageable);
     }
 
     /**
@@ -94,8 +94,10 @@ public class BoardService {
      * @return 저장된 게시글 엔티티
      */
     @Transactional
-    public BoardResponseDto saveBoard(Board board) {
+    public BoardResponseDto saveBoard(Board board, Integer userId) {
         boardRepository.save(board);
+        User user=userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        board.setUser(user); user.addBoard(board);
         return BoardResponseDto.from(board);
     }
 
