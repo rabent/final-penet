@@ -10,34 +10,42 @@
             id="email"
             v-model="registerForm.email"
             required
-            placeholder="이메일을 입력하세요"
+            maxlength="40"
+            placeholder="이메일을 입력하세요 (40자 이하)"
           />
+          <span class="input-guide" v-if="!isValidEmail">
+            올바른 이메일 형식이 아닙니다.
+          </span>
         </div>
 
-        
         <div class="form-group">
-            <label for="password">비밀번호</label>
-            <input
+          <label for="password">비밀번호</label>
+          <input
             type="password"
             id="password"
             v-model="registerForm.password"
             required
-            placeholder="비밀번호를 입력하세요"
-            />
+            minlength="8"
+            maxlength="15"
+            placeholder="비밀번호를 입력하세요 (8-15자)"
+          />
+          <span class="input-guide" v-if="!isValidPassword">
+            비밀번호는 8자 이상 15자 이하로 입력해주세요.
+          </span>
         </div>
         
         <div class="form-group">
-            <label for="passwordConfirm">비밀번호 확인</label>
-            <input
+          <label for="passwordConfirm">비밀번호 확인</label>
+          <input
             type="password"
             id="passwordConfirm"
             v-model="passwordConfirm"
             required
             placeholder="비밀번호를 다시 입력하세요"
-            />
-            <span class="password-match" :class="{ 'not-match': !isPasswordMatch && passwordConfirm }">
-                {{ passwordMatchMessage }}
-            </span>
+          />
+          <span class="password-match" :class="{ 'not-match': !isPasswordMatch && passwordConfirm }">
+            {{ passwordMatchMessage }}
+          </span>
         </div>
         
         <div class="form-group">
@@ -47,18 +55,20 @@
             id="name"
             v-model="registerForm.name"
             required
-            placeholder="이름을 입력하세요"
+            maxlength="15"
+            placeholder="이름을 입력하세요 (15자 이하)"
           />
         </div>
         
         <div class="form-group">
-            <label for="address">주소</label>
-            <input
+          <label for="address">주소</label>
+          <input
             type="text"
             id="address"
             v-model="registerForm.address"
             required
-            placeholder="주소를 입력하세요"
+            maxlength="50"
+            placeholder="주소를 입력하세요 (50자 이하)"
           />
         </div>
 
@@ -90,6 +100,7 @@
 <script setup>
 import { reactive, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'  // axios import 추가
 
 const router = useRouter()
 const passwordConfirm = ref('')
@@ -131,13 +142,31 @@ const getFormattedPhoneNumber = () => {
   return num
 }
 
+// 이메일 유효성 검사 추가
+const isValidEmail = computed(() => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return !registerForm.email || emailRegex.test(registerForm.email)
+})
+
+// 비밀번호 유효성 검사 추가
+const isValidPassword = computed(() => {
+  return !registerForm.password || 
+    (registerForm.password.length >= 8 && registerForm.password.length <= 15)
+})
+
+// isFormValid에 새로운 조건 추가
 const isFormValid = computed(() => {
   return registerForm.name &&
+         registerForm.name.length <= 15 &&
          registerForm.password &&
+         isValidPassword.value &&
          passwordConfirm.value &&
          registerForm.password === passwordConfirm.value &&
          registerForm.email &&
+         isValidEmail.value &&
+         registerForm.email.length <= 40 &&
          registerForm.address &&
+         registerForm.address.length <= 50 &&
          registerForm.number &&
          isValidPhoneNumber.value
 })
@@ -155,11 +184,34 @@ const handleRegister = async () => {
       number: getFormattedPhoneNumber() // 전화번호 포맷팅
     }
 
-    // TODO: API 호출 구현
-    console.log('회원가입 시도:', formData)
-    router.push('/login')
+    // API 호출
+    const response = await axios.post('http://localhost:8080/api/users', formData)
+    
+    if (response.data) {
+      alert('회원가입이 완료되었습니다.')
+      console.log('회원가입 성공:', response.data)
+      router.push('/login')
+    }
   } catch (error) {
     console.error('회원가입 실패:', error)
+    if (error.response) {
+      // 서버가 응답한 에러
+      switch (error.response.status) {
+        case 400:
+          alert('잘못된 요청입니다. 입력값을 확인해주세요.')
+          break
+        case 409:
+          alert('이미 사용중인 이메일입니다.')
+          break
+        default:
+          alert('회원가입 중 오류가 발생했습니다.')
+      }
+    } else if (error.request) {
+      // 서버에 요청이 도달하지 못한 경우
+      alert('서버에 연결할 수 없습니다.')
+    } else {
+      alert('회원가입 처리 중 오류가 발생했습니다.')
+    }
   }
 }
 </script>
