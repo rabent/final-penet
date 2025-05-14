@@ -56,8 +56,10 @@ public class TripPlanService {
     /**
      * 여행 계획 저장
      */
-    public TripPlanResponseDto saveTripPlan(TripPlanRequestDto dto) {
+    public TripPlanResponseDto saveTripPlan(TripPlanRequestDto dto, Integer userId) {
         TripPlan tripPlan=dto.toEntity();
+        User user=userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        user.addPlan(tripPlan);
         return TripPlanResponseDto.from(tripPlanRepository.save(tripPlan));
     }
 

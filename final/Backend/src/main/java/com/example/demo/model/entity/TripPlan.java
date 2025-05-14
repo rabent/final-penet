@@ -28,8 +28,8 @@ public class TripPlan {
     private User user;
 
     @OneToMany(mappedBy="plan", cascade = CascadeType.ALL ,fetch = FetchType.LAZY, orphanRemoval = true)
-    @Singular
-    private List<TripSnippet> snippets;
+    @Builder.Default
+    private List<TripSnippet> snippets=new ArrayList<>();
 
     @Column(name="plan_name", length = 50, nullable=false)
     private String planName;

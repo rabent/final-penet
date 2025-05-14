@@ -164,7 +164,7 @@ class AttractionRepositoryTest {
     @DisplayName("시군구 코드로 관광지 필터링 테스트")
     void searchAttractionSummariesBySigunCode() {
         // given
-        String sigunCode = "1"; // 강남구 (문자열로 변환됨)
+        Integer sigunCode = 1; // 강남구 (문자열로 변환됨)
         Pageable pageable = PageRequest.of(0, 10);
 
         // when

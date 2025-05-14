@@ -26,7 +26,7 @@ public interface AttractionRepository extends JpaRepository<Attraction, Integer>
            )
     Page<AttractionSummaryDto> searchAttractionSummaries(
             @Param("areaCode") Integer areaCode,
-            @Param("sigunCode") String sigunCode,
+            @Param("sigunCode") Integer sigunCode,
             @Param("contentTypeId") Integer contentTypeId,
             Pageable pageable);
 }

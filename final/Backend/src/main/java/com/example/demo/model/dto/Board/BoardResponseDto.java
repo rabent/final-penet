@@ -32,8 +32,10 @@ public class BoardResponseDto {
 
     public static BoardResponseDto from(Board board) {
         List<String> list=new ArrayList<>();
-        for(BImage image : board.getImages()) {
-            list.add(image.getFileName());
+        if(board.getImages()!=null) {
+            for (BImage image : board.getImages()) {
+                list.add(image.getFileName());
+            }
         }
         return new BoardResponseDto(
             board.getUser() != null ? board.getUser().getName() : null,
