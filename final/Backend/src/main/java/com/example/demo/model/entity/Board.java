@@ -39,8 +39,8 @@ public class Board {
     private User user;
 
     @OneToMany(mappedBy="board",fetch = FetchType.LAZY)
-    @Singular
-    private List<BImage> images;
+    @Builder.Default
+    private List<BImage> images=new ArrayList<>();
     
     @Column(name = "title", length = 30, nullable = false)
     private String title;

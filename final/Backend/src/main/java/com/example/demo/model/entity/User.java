@@ -49,12 +49,12 @@ public class User {
     private String number;
 
     @OneToMany(mappedBy = "user", orphanRemoval = false)
-    @Singular
-    private List<Board> boards;
+    @Builder.Default
+    private List<Board> boards=new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL ,orphanRemoval = true)
-    @Singular
-    private List<TripPlan> plans;
+    @Builder.Default
+    private List<TripPlan> plans=new ArrayList<>();
 
     public void addBoard(Board board) {
         this.boards.add(board);

@@ -97,7 +97,7 @@ public class BoardService {
     public BoardResponseDto saveBoard(Board board, Integer userId) {
         boardRepository.save(board);
         User user=userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-        board.setUser(user); user.addBoard(board);
+        user.addBoard(board);
         return BoardResponseDto.from(board);
     }
 

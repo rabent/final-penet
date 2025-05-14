@@ -12,6 +12,6 @@ import lombok.*;
 @Builder
 public class AttractionSearchCriteria {
     private Integer areaCode;
-    private String sigunCode;
+    private Integer sigunCode;
     private Integer contentTypeId;
 }
