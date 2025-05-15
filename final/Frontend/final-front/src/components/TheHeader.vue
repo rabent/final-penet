@@ -13,14 +13,49 @@
         </nav>
       </div>
       <div class="header-right">
-        <router-link to="/login" class="auth-btn login-btn">로그인</router-link>
-        <router-link to="/register" class="auth-btn register-btn">회원가입</router-link>
+        <template v-if="isLoggedIn">
+          <router-link to="/mypage" class="auth-btn mypage-btn">마이페이지</router-link>
+          <button @click="handleLogout" class="auth-btn logout-btn">로그아웃</button>
+        </template>
+        <template v-else>
+          <router-link to="/login" class="auth-btn login-btn">로그인</router-link>
+          <router-link to="/register" class="auth-btn register-btn">회원가입</router-link>
+        </template>
       </div>
     </div>
   </header>
 </template>
 
 <script setup>
+import { ref, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const isLoggedIn = ref(false)
+
+const checkLoginStatus = () => {
+  const token = sessionStorage.getItem('token')
+  console.log('현재 토큰:', token) // 토큰 확인용
+  isLoggedIn.value = !!token
+}
+
+// 컴포넌트 마운트 시 로그인 상태 확인
+onMounted(() => {
+  checkLoginStatus()
+})
+
+// 라우트 변경 시마다 로그인 상태 확인
+watch(() => router.currentRoute.value, () => {
+  checkLoginStatus()
+})
+
+const handleLogout = () => {
+  sessionStorage.removeItem('token')
+  sessionStorage.removeItem('userId')
+  isLoggedIn.value = false
+  router.push('/login')
+}
+
 defineOptions({
   name: 'TheHeader'
 })
@@ -131,5 +166,26 @@ defineOptions({
 
 .register-btn:hover {
   background-color: #27ae60;
+}
+
+.mypage-btn {
+  background-color: #3498db;
+  color: white;
+  border: none;
+}
+
+.mypage-btn:hover {
+  background-color: #2980b9;
+}
+
+.logout-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background-color: #c0392b;
 }
 </style>
