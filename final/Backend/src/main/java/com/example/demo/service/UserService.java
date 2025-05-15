@@ -10,6 +10,8 @@ import com.example.demo.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -22,5 +24,14 @@ public class UserService {
         }
         User user = dto.toEntity();
         return userRepository.save(user).getId();
+    }
+
+    public UserResponseDto login(String email, String password) {
+        Optional<User> user = userRepository.findByEmailAndPassword(email, password);
+        if(user.isEmpty()) {
+            throw new IllegalArgumentException("가입된 이메일이 없습니다.");
+        }
+
+        return UserResponseDto.from(user.get());
     }
 }
