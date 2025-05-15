@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface TripSnippetRepository extends JpaRepository<TripSnippet, Integer> {
-    // 특정 plan_id에 해당하는 모든 스니펫 조회
+    // 특정 plan에 해당하는 모든 스니펫 조회
     List<TripSnippet> findByPlan(TripPlan plan);
 
     @Query("SELECT new com.example.demo.model.dto.TPsnippet.TPsnippetSummaryDto(t.id, a.title, t.price) " +
