@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.example.demo.model.dto.BoardListDto;
+import com.example.demo.model.dto.Board.BoardSummaryDto;
 import com.example.demo.model.entity.Board;
 import com.example.demo.model.entity.User;
 
@@ -17,19 +17,20 @@ import com.example.demo.model.entity.User;
 
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Integer> {
-    //게시판 리스트용 dto 페이징(상세는 findbyid로)
-    @Query("SELECT new com.example.demo.model.dto.BoardListDto(b.id, b.title, b.hit, b.user, b.createdAt) FROM Board b")
-    Page<BoardListDto> findAllForList(Pageable pageable);
+    //게시판 리스트용 dto 페이징
+    @Query("SELECT new com.example.demo.model.dto.Board.BoardSummaryDto(b.id, b.title, b.hit, u.name, b.createdAt) FROM Board b join b.user u")
+    Page<BoardSummaryDto> findAllForList(Pageable pageable);
 
     // 제목 검색 결과를 페이징하여 가져오기(10개씩으로 구현 필요)
-    @Query("SELECT new com.example.demo.model.dto.BoardListDto(b.id, b.title, b.hit, b.user, b.createdAt) FROM Board b " + 
+    @Query("SELECT new com.example.demo.model.dto.Board.BoardSummaryDto(b.id, b.title, b.hit, u.name, b.createdAt) FROM Board b join b.user u " +
     "WHERE b.title LIKE %:keyword% ")
-    Page<BoardListDto> findByTitleContaining(@Param("keyword") String keyword, Pageable pageable);
+    Page<BoardSummaryDto> findByTitleContaining(@Param("keyword") String keyword, Pageable pageable);
 
     // 특정 사용자의 게시글을 페이징하여 가져오기
-    @Query("SELECT new com.example.demo.model.dto.BoardListDto(b.id, b.title, b.hit, b.user, b.createdAt) FROM Board b " + 
+    @Query("SELECT new com.example.demo.model.dto.Board.BoardSummaryDto(b.id, b.title, b.hit, u.name, b.createdAt) FROM Board b join b.user u " +
     "WHERE b.user=:user ")
-    Page<BoardListDto> findByUser(@Param("user") User user, Pageable pageable);  
+    Page<BoardSummaryDto> findByUser(@Param("user") User user, Pageable pageable);  
+
     // 조회수 기준으로 내림차순 정렬하여 상위 N개 게시글 찾기(옵션)
     @Query("SELECT b FROM Board b ORDER BY b.hit DESC")
     List<Board> findTopNByOrderByHitDesc(Pageable pageable);

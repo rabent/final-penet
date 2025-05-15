@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 import lombok.Singular;
 
 @Entity
-@Table(name = "user")
+@Table(name = "\"user\"")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,11 +30,11 @@ public class User {
     @Column(name = "user_id")
     private Integer id;
     
-    @Column(name = "password", length = 15, nullable = false)
-    private String password;
-    
     @Column(name = "name", length = 15, nullable = false)
     private String name;
+    
+    @Column(name = "password", length = 15, nullable = false)
+    private String password;
     
     @Column(name = "role", length = 10, nullable = false)
     private String role;
@@ -49,12 +49,12 @@ public class User {
     private String number;
 
     @OneToMany(mappedBy = "user", orphanRemoval = false)
-    @Singular
-    private List<Board> boards;
+    @Builder.Default
+    private List<Board> boards=new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL ,orphanRemoval = true)
-    @Singular
-    private List<TripPlan> plans;
+    @Builder.Default
+    private List<TripPlan> plans=new ArrayList<>();
 
     public void addBoard(Board board) {
         this.boards.add(board);
