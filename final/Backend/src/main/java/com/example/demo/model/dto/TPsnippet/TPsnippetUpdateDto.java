@@ -19,12 +19,5 @@ public class TPsnippetUpdateDto {
     @Size(max = 200)
     private String schedule;
 
-    public void updateEntity(TripSnippet snippet) {
-        if (this.price != null) {
-            snippet.setPrice(this.price);
-        }
-        if (this.schedule != null) {
-            snippet.setSchedule(this.schedule);
-        }
-    }
+    private Integer no;
 }
