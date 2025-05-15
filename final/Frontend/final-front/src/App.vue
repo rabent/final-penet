@@ -14,17 +14,8 @@
   </div>
 </template>
 
-<script>
-// Vue 3에서는 Composition API 사용 가능 (Options API도 여전히 지원)
-// 여기서는 Options API를 사용하여 구현
-import Header from './components/Header.vue'
-
-export default {
-  name: 'App',
-  components: {
-    Header
-  }
-}
+<script setup>
+import Header from './components/TheHeader.vue'
 </script>
 
 <style>
