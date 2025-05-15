@@ -11,18 +11,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.Singular;
+import lombok.*;
 
 @Entity
 @Table(name = "\"user\"")
-@Data
+@Getter // @Data 대신
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString(exclude = "boards")
+@EqualsAndHashCode(exclude = "boards")
 public class User {
 
     @Id  // 기본키 지정

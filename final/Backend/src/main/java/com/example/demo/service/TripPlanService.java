@@ -1,25 +1,8 @@
 package com.example.demo.service;
 
-import com.example.demo.model.dto.Attraction.AttractionSummaryDto;
-import com.example.demo.model.dto.TPsnippet.TPsnippetRequestDto;
-import com.example.demo.model.dto.TPsnippet.TPsnippetResponseDto;
-import com.example.demo.model.dto.TPsnippet.TPsnippetUpdateDto;
-import com.example.demo.model.dto.TripPlan.TripPlanRequestDto;
-import com.example.demo.model.dto.TripPlan.TripPlanResponseDto;
-import com.example.demo.model.dto.TripPlan.TripPlanUpdateDto;
-import com.example.demo.model.entity.Attraction;
-import com.example.demo.model.entity.TripPlan;
-import com.example.demo.model.entity.TripSnippet;
-import com.example.demo.model.entity.User;
-import com.example.demo.model.dto.TripPlan.TripPlanSummaryDto;
-import com.example.demo.model.dto.TPsnippet.TPsnippetSummaryDto;
-import com.example.demo.repository.AttractionRepository;
-import com.example.demo.repository.TripPlanRepository;
-import com.example.demo.repository.TripSnippetRepository;
-import com.example.demo.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
-import lombok.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,8 +10,29 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
+import com.example.demo.model.dto.Attraction.AttractionSummaryDto;
+import com.example.demo.model.dto.TPsnippet.TPsnippetRequestDto;
+import com.example.demo.model.dto.TPsnippet.TPsnippetResponseDto;
+import com.example.demo.model.dto.TPsnippet.TPsnippetSummaryDto;
+import com.example.demo.model.dto.TPsnippet.TPsnippetUpdateDto;
+import com.example.demo.model.dto.TripPlan.TripPlanRequestDto;
+import com.example.demo.model.dto.TripPlan.TripPlanResponseDto;
+import com.example.demo.model.dto.TripPlan.TripPlanSummaryDto;
+import com.example.demo.model.dto.TripPlan.TripPlanUpdateDto;
+import com.example.demo.model.entity.Attraction;
+import com.example.demo.model.entity.TripPlan;
+import com.example.demo.model.entity.TripSnippet;
+import com.example.demo.model.entity.User;
+import com.example.demo.repository.AttractionRepository;
+import com.example.demo.repository.TripPlanRepository;
+import com.example.demo.repository.TripSnippetRepository;
+import com.example.demo.repository.UserRepository;
+
+import jakarta.persistence.EntityNotFoundException;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Service
 @Transactional
@@ -134,8 +138,8 @@ public class TripPlanService {
     /**
      * 여행 스니펫 수정
      */
-    public TPsnippetResponseDto UpdateTripSnippet(TPsnippetUpdateDto dto, Integer id) {
-        TripSnippet snippet=tripSnippetRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("계획 스니펫이 없습니다"));
+    public TPsnippetResponseDto UpdateTripSnippet(TPsnippetUpdateDto dto, Integer snipId) {
+        TripSnippet snippet=tripSnippetRepository.findById(snipId).orElseThrow(()-> new EntityNotFoundException("계획 스니펫이 없습니다"));
         snippet.setPrice(dto.getPrice()); snippet.setSchedule(dto.getSchedule());
         if(dto.getNo()!=null) {
             Attraction attraction=attractionRepository.findById(dto.getNo()).orElseThrow(()-> new EntityNotFoundException("관광지를 찾을 수 없습니다."));
@@ -158,8 +162,9 @@ public class TripPlanService {
 
             return new TripPlanWithSnippetsDto(plan, snippets);
         }
-
-        return null;
+        else {
+            throw new EntityNotFoundException("여행 계획을 찾을 수 없습니다.");
+        }
     }
 
     /**
