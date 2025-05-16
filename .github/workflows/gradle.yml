@@ -28,9 +28,9 @@ jobs:
       - name: Test with Gradle
         run: |
           ./gradlew test --info
-          
 
-      - name: 테스트 보고서 업로드
+
+      - name: test report upload
         if: always()
         uses: actions/upload-artifact@v4
         with:
