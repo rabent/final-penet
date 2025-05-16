@@ -4,13 +4,13 @@
       <h2>로그인</h2>
       <form @submit.prevent="handleLogin" class="login-form">
         <div class="form-group">
-          <label for="userId">아이디</label>
+          <label for="email">이메일</label>
           <input
-            type="text"
-            id="userId"
-            v-model="loginForm.userId"
+            type="email"
+            id="email"
+            v-model="loginForm.email"
             required
-            placeholder="아이디를 입력하세요"
+            placeholder="이메일을 입력하세요"
           />
         </div>
         <div class="form-group">
@@ -46,23 +46,47 @@
 <script setup>
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 
 const router = useRouter()
 
 const loginForm = reactive({
-  userId: '',
-  password: '',
-  rememberMe: false
+  email: '',    // userId를 email로 변경
+  password: ''
 })
 
 const handleLogin = async () => {
   try {
-    // TODO: API 호출 구현
-    console.log('로그인 시도:', loginForm)
-    // 로그인 성공 시 홈으로 이동
-    router.push('/')
+    const response = await axios.post('http://localhost:8080/api/auth/login', {
+      email: loginForm.email,
+      password: loginForm.password
+    })
+
+    console.log('로그인 응답:', response.data) // 응답 데이터 확인용
+
+    // response.data에서 직접 값을 가져옴
+    const token = response.data.Authorization
+    const userId = response.data.userId
+
+    if (token && userId) {
+      sessionStorage.setItem('token', token)
+      sessionStorage.setItem('userId', userId)
+      
+      console.log('저장된 토큰:', sessionStorage.getItem('token')) // 저장 확인용
+      console.log('저장된 userId:', sessionStorage.getItem('userId'))
+      
+      router.push('/')
+    } else {
+      throw new Error('로그인 응답 데이터가 올바르지 않습니다.')
+    }
   } catch (error) {
     console.error('로그인 실패:', error)
+    if (error.response) {
+      console.error('에러 응답:', error.response.data)
+      alert('로그인에 실패했습니다.')
+    } else {
+      alert(error.message)
+    }
   }
 }
 </script>
