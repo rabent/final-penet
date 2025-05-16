@@ -28,3 +28,13 @@ jobs:
       - name: Test with Gradle
         run: |
           ./gradlew test --info
+          
+
+      - name: 테스트 보고서 업로드
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-reports
+          path: |
+            /home/runner/work/final-penet/final-penet/final/Backend/build/reports/tests/test/
+            /home/runner/work/final-penet/final-penet/final/Backend/build/test-results/test/
