@@ -17,6 +17,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -31,7 +33,8 @@ import com.example.demo.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
+//@Transactional
 public class TripPlanControllerIntegrationTest {
 
     @Autowired
@@ -66,7 +69,6 @@ public class TripPlanControllerIntegrationTest {
         
         // 테스트 관광지 생성
         testAttraction = Attraction.builder()
-                .no(1)
                 .contentId(1234)
                 .contentTypeId(12)
                 .title("테스트 관광지")

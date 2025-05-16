@@ -3,11 +3,15 @@ package com.example.demo.integration;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+
+import com.example.demo.config.GlobalExceptionHandler;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -17,9 +21,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.demo.model.entity.Attraction;
 import com.example.demo.repository.AttractionRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)  // Spring Security 필터 비활성화
+//@Transactional
 public class AttractionControllerIntegrationTest {
 
     @Autowired
@@ -32,9 +38,9 @@ public class AttractionControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        attractionRepository.deleteAll();
         // 테스트용 관광지 데이터 생성 및 저장
         testAttraction = Attraction.builder()
-                .no(1)
                 .contentId(1234)
                 .contentTypeId(12)
                 .title("테스트 관광지")
@@ -51,11 +57,9 @@ public class AttractionControllerIntegrationTest {
                 .homePage("http://test.com")
                 .overview("테스트 관광지 개요")
                 .build();
-
-        // 기존에 저장된 데이터가 있다면 삭제하고 새로 저장
-        attractionRepository.deleteAll();
-        attractionRepository.save(testAttraction);
+        testAttraction = attractionRepository.save(testAttraction);
     }
+
 
     @Test
     void getAttractions_returnsPageOfAttractionSummaries() throws Exception {
