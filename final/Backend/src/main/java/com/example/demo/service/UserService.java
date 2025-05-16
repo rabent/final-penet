@@ -12,6 +12,8 @@ import com.example.demo.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -26,6 +28,7 @@ public class UserService {
         return userRepository.save(user).getId();
     }
 
+
     public UserResponseDto userDetail(Integer id) {
         User user=userRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         return UserResponseDto.from(user);
@@ -38,5 +41,14 @@ public class UserService {
 
     public void userDelete(Integer id) {
         userRepository.deleteById(id);
+
+    public UserResponseDto login(String email, String password) {
+        Optional<User> user = userRepository.findByEmailAndPassword(email, password);
+        if(user.isEmpty()) {
+            throw new IllegalArgumentException("가입된 이메일이 없습니다.");
+        }
+
+        return UserResponseDto.from(user.get());
+
     }
 }
