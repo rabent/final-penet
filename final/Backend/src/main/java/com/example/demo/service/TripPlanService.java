@@ -147,7 +147,8 @@ public class TripPlanService {
             AttractionSummaryDto attractionSummaryDto=AttractionSummaryDto.from(attraction);
             return new TPsnippetResponseDto(snippet.getPrice(), snippet.getSchedule(), attractionSummaryDto);
         }
-        return null;
+        AttractionSummaryDto attractionSummaryDto=AttractionSummaryDto.from(snippet.getAttraction());
+        return new TPsnippetResponseDto(snippet.getPrice(), snippet.getSchedule(), attractionSummaryDto);
     }
 
     /**
