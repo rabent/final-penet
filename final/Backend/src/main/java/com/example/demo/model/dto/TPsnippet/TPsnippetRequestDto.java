@@ -22,6 +22,8 @@ public class TPsnippetRequestDto {
    @Size(max = 200)
    private String schedule;
 
+   private Integer no;
+
    public TripSnippet toEntity() { // service 단에서 referencebyid로 attraction 추가 필요
        return TripSnippet.builder()
                .price(this.price)

@@ -7,7 +7,9 @@ import com.example.demo.model.entity.Board;
 import com.example.demo.model.entity.User;
 import com.example.demo.repository.BoardRepository;
 import com.example.demo.repository.UserRepository;
+
 import jakarta.persistence.EntityNotFoundException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,6 +36,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import com.example.demo.model.dto.Board.BoardRequestDto;
 
 @ExtendWith(MockitoExtension.class)
 public class BoardServiceTest {
@@ -216,20 +220,23 @@ public class BoardServiceTest {
     void saveBoard() {
         // given
         Integer userId = 1;
-        Board newBoard = new Board();
+        BoardRequestDto newBoard=new BoardRequestDto(null, null);
         newBoard.setTitle("새 게시글");
         newBoard.setContent("새 내용");
+        Board resBoard=new Board();
+        resBoard.setTitle("새 게시글");
+        resBoard.setContent("새 내용");
+
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(boardRepository.save(any(Board.class))).thenReturn(newBoard);
+        when(boardRepository.save(any(Board.class))).thenReturn(resBoard);
 
         // when
         BoardResponseDto result = boardService.saveBoard(newBoard, userId);
 
         // then
         assertThat(result).isNotNull();
-        assertThat(newBoard.getUser()).isEqualTo(testUser);
-        verify(boardRepository, times(1)).save(newBoard);
+        verify(boardRepository, times(1)).save(resBoard);
         verify(userRepository, times(1)).findById(userId);
     }
 
@@ -238,7 +245,7 @@ public class BoardServiceTest {
     void saveBoard_UserNotFound() {
         // given
         Integer userId = 999;
-        Board newBoard = new Board();
+        BoardRequestDto newBoard=new BoardRequestDto(null, null);
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         // when & then
@@ -253,7 +260,7 @@ public class BoardServiceTest {
     void deleteBoard() {
         // given
         Integer boardId = 1;
-
+        when(boardRepository.findById(boardId)).thenReturn(Optional.of(testBoard1));
         // when
         boardService.deleteBoard(boardId);
 
