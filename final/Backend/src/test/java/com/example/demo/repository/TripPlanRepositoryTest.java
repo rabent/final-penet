@@ -19,7 +19,6 @@ import com.example.demo.model.entity.TripPlan;
 import com.example.demo.model.entity.User;
 
 @DataJpaTest
-@ActiveProfiles("test")
 class TripPlanRepositoryTest {
 
     @Autowired
