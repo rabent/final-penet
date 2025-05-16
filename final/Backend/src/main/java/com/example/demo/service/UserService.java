@@ -41,6 +41,7 @@ public class UserService {
 
     public void userDelete(Integer id) {
         userRepository.deleteById(id);
+    }
 
     public UserResponseDto login(String email, String password) {
         Optional<User> user = userRepository.findByEmailAndPassword(email, password);
