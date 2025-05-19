@@ -14,11 +14,11 @@
 
       <div class="post-info">
         <div class="post-author-info">
-          <span class="author">{{ post.author }}</span>
-          <span class="date">{{ formatDate(post.createTime) }}</span>
+          <span class="author">{{ post.username }}</span>
+          <span class="date">{{ formatDate(post.createdAt) }}</span>
         </div>
         <div class="post-stats">
-          <span class="views">조회 {{ post.viewCount }}</span>
+          <span class="views">조회 {{ post.hit }}</span>
         </div>
       </div>
 
@@ -86,7 +86,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import axios from 'axios';
+import api from '@/utils/axios';
 
 const route = useRoute();
 const router = useRouter();
@@ -117,23 +117,10 @@ const loadPost = async () => {
     error.value = null;
 
     // 실제 환경에서는 API 호출
-    // const response = await axios.get(`http://localhost:8080/api/boards/${postId}`);
-    // post.value = response.data;
-
-    // 임시 데이터 (백엔드 연동 전까지 사용)
-    setTimeout(() => {
-      post.value = {
-        id: postId,
-        title: '제주도 여행 후기와 추천 장소',
-        content: `제주도 3박 4일 여행을 다녀왔습니다. 정말 아름다운 풍경과 맛있는 음식들이 많아서 좋았어요.\n\n첫째 날에는 성산일출봉에 다녀왔습니다. 날씨가 좋아서 정상에서 바라본 풍경이 환상적이었어요. 근처 카페에서 먹은 오메기떡도 맛있었습니다.\n\n둘째 날에는 우도에 갔습니다. 페리를 타고 가는 과정도 재미있었고, 우도에서 전동 자전거를 빌려 섬을 돌아다녔어요. 우도봉에 올라가서 보는 경치가 정말 좋았습니다.\n\n셋째 날에는 한라산을 등반했습니다. 생각보다 힘들었지만, 정상에서 바라본 경치가 모든 피로를 잊게 했어요. 백록담의 모습이 정말 아름다웠습니다.\n\n마지막 날에는 중문관광단지와 천지연폭포를 방문했습니다. 가족 여행으로도 좋고, 친구들과 함께 가도 좋을 것 같아요.\n\n숙소는 제주시내에 있는 호텔을 이용했는데, 렌트카를 빌려서 이동했기 때문에 큰 불편함은 없었습니다. 다음에 또 방문하고 싶은 곳이에요!`,
-        author: '여행자123',
-        createTime: '2025-05-15T15:30:00',
-        viewCount: 42,
-        userId: '1' // 임시 사용자 ID
-      };
-      loadComments();
-      isLoading.value = false;
-    }, 800); // 로딩 효과를 보여주기 위한 지연
+     const response = await api.get(`boards/${postId}`);
+     post.value = response.data.board;
+     currentUserId.value=response.data.userId;
+     isLoading.value = false;
   } catch (err) {
     console.error('게시글 로드 실패:', err);
     error.value = '게시글을 불러오는 중 오류가 발생했습니다.';
@@ -247,8 +234,8 @@ const confirmDelete = () => {
 // 게시글 삭제
 const deletePost = async () => {
   try {
-    // 실제 환경에서는 API 호출
-    // await axios.delete(`http://localhost:8080/api/boards/${postId}`);
+     //실제 환경에서는 API 호출
+     await api.delete(`/boards/${postId}`);
 
     alert('게시글이 삭제되었습니다.');
     router.push('/board');
@@ -286,9 +273,6 @@ const formatDate = (dateString) => {
 
 // 컴포넌트 마운트 시 실행
 onMounted(() => {
-  // 현재 로그인한 사용자 ID 가져오기
-  currentUserId.value = sessionStorage.getItem('userId');
-
   // 게시글 로드
   loadPost();
 });

@@ -26,12 +26,12 @@ public class TripPlanController {
     }
 
     @PostMapping
-    public ResponseEntity<TripPlanService.TripPlanWithSnippetsDto> planPost(@ModelAttribute @Valid TripPlanRequestDto dto, Integer userId) {
+    public ResponseEntity<TripPlanService.TripPlanWithSnippetsDto> planPost(@RequestBody @Valid TripPlanRequestDto dto, Integer userId) {
         return ResponseEntity.ok(tripPlanService.saveTripPlan(dto, userId));
     }
 
     @PutMapping("/{planId}")
-    public ResponseEntity<TripPlanService.TripPlanWithSnippetsDto> planUpdate(@ModelAttribute @Valid TripPlanUpdateDto dto, @PathVariable Integer planId) {
+    public ResponseEntity<TripPlanService.TripPlanWithSnippetsDto> planUpdate(@RequestBody @Valid TripPlanUpdateDto dto, @PathVariable Integer planId) {
         return ResponseEntity.ok(tripPlanService.UpdateTripPlan(dto,planId));
     }
 
@@ -52,12 +52,12 @@ public class TripPlanController {
     }
 
     @PutMapping("/{planId}/{snipId}")
-    public ResponseEntity<TPsnippetResponseDto> snippetUpdate(@ModelAttribute @Valid TPsnippetUpdateDto dto, @PathVariable Integer planId, @PathVariable Integer snipId) {
+    public ResponseEntity<TPsnippetResponseDto> snippetUpdate(@RequestBody @Valid TPsnippetUpdateDto dto, @PathVariable Integer planId, @PathVariable Integer snipId) {
         return ResponseEntity.ok(tripPlanService.UpdateTripSnippet(dto,snipId));
     }
 
     @PostMapping("/{planId}")
-    public ResponseEntity<TPsnippetResponseDto> snippetPost(@ModelAttribute @Valid TPsnippetRequestDto dto, @PathVariable Integer planId) {
+    public ResponseEntity<TPsnippetResponseDto> snippetPost(@RequestBody @Valid TPsnippetRequestDto dto, @PathVariable Integer planId) {
         return ResponseEntity.ok(tripPlanService.saveTripSnippet(dto, planId));
     }
 

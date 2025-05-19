@@ -8,6 +8,7 @@ import Register from '../views/RegisterView.vue'
 import Board from '../views/BoardView.vue'
 import BoardWrite from '../views/BoardWriteView.vue'
 import BoardDetail from '../views/BoardDetailView.vue'
+import BoardEditView from '../views/BoardEditView.vue'
 
 const routes = [
   {
@@ -42,10 +43,9 @@ const routes = [
     component: BoardDetail
   },
   {
-    path: '/board/edit/:id',
-    name: 'BoardEdit',
-    component: () => import('../views/BoardWriteView.vue'), // 수정 페이지는 작성 페이지를 재활용
-    meta: { requiresAuth: true }
+      path: '/board/edit/:id',
+      name: 'boardEdit',
+      component: BoardEditView
   }
   // 나중에 필요한 경우 추가 라우트
   // ,{
