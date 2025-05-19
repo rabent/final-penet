@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
@@ -21,6 +23,7 @@ import org.springframework.util.MultiValueMap;
 import java.time.LocalDateTime;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -89,9 +92,11 @@ public class BoardControllerIntegrationTest {
         params.add("title", "새 게시글");
         params.add("content", "새 게시글 내용입니다.");
 
+        Authentication authentication = new TestingAuthenticationToken(testUser.getId().toString(), null, "ROLE_USER");
+
         mockMvc.perform(post("/boards")
                 .params(params)
-                .param("id", testUser.getId().toString())
+                .with(authentication(authentication))
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title", is("새 게시글")))
