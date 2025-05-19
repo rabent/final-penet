@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -96,10 +97,12 @@ public class BoardService {
      */
     @Transactional
     public BoardResponseDto saveBoard(BoardRequestDto dto, Integer userId) {
-        Board board=boardRepository.save(dto.toEntity());
+        Board board=dto.toEntity();
         User user=userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         user.addBoard(board);
         board.setUser(user);
+        board.setHit(0); board.setCreatedAt(LocalDateTime.now());
+        boardRepository.save(board);
         return BoardResponseDto.from(board);
     }
 
