@@ -50,10 +50,10 @@ public class Board {
     @Column(name = "content", length = 900, nullable = false)
     private String content;
     
-    @Column(name = "hit")
+    @Column(name = "hit", nullable = false)
     private Integer hit;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     public void addImage(BImage image) {

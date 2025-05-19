@@ -37,7 +37,7 @@
 <script setup>
 import { reactive, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
+import api from '@/utils/axios';
 
 const router = useRouter();
 
@@ -73,17 +73,17 @@ const submitPost = async () => {
     }
 
     // 실제 환경에서는 API 호출
-    // const response = await axios.post('http://localhost:8080/api/boards', postForm);
+    const response = await api.post('http://localhost:8080/api/boards', postForm);
 
     // TODO: 백엔드 API 완성 후 주석 해제
-    // if (response.data) {
-    //   alert('게시글이 등록되었습니다.');
-    //   router.push('/board');
-    // }
+    if (response.data) {
+       alert('게시글이 등록되었습니다.');
+       router.push('/board');
+    }
 
     // 백엔드 연동 전까지는 성공했다고 가정
-    alert('게시글이 등록되었습니다.');
-    router.push('/board');
+    //alert('게시글이 등록되었습니다.');
+    //router.push('/board');
   } catch (error) {
     console.error('게시글 등록 실패:', error);
     alert('게시글 등록에 실패했습니다.');

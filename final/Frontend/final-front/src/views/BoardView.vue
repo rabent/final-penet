@@ -34,9 +34,9 @@
           <tr v-for="post in posts" :key="post.id" @click="viewPost(post.id)" class="post-row">
             <td>{{ post.id }}</td>
             <td class="post-title">{{ post.title }}</td>
-            <td>{{ post.author }}</td>
-            <td>{{ formatDate(post.createTime) }}</td>
-            <td>{{ post.viewCount }}</td>
+            <td>{{ post.user }}</td>
+            <td>{{ formatDate(post.createdAt) }}</td>
+            <td>{{ post.hit }}</td>
           </tr>
           <tr v-if="posts.length === 0">
             <td colspan="5" class="no-posts">게시글이 없습니다.</td>
@@ -82,7 +82,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
+import api from '@/utils/axios';
 
 const router = useRouter();
 const posts = ref([]);
@@ -109,36 +109,36 @@ const totalPages = computed(() => {
 // 게시글 불러오기
 const loadPosts = async () => {
   try {
-    // 실제 환경에서는 API 호출
-    // const response = await axios.get('http://localhost:8080/api/boards', {
-    //   params: {
-    //     page: currentPage.value - 1,
-    //     size: pageSize,
-    //     sort: sortBy.value,
-    //     query: searchQuery.value
-    //   }
-    // });
+    //실제 환경에서는 API 호출
+    const response = await api.get('/boards', {
+        params: {
+        page: currentPage.value - 1,
+        size: pageSize,
+        sort: sortBy.value,
+        query: searchQuery.value
+        }
+    });
 
     // TODO: 백엔드 API 완성 후 주석 해제
-    // posts.value = response.data.content;
-    // totalPosts.value = response.data.totalElements;
+    posts.value = response.data.content;
+    totalPosts.value = response.data.totalElements;
 
     // 임시 데이터 (백엔드 연동 전까지 사용)
-    const dummyPosts = [
-      { id: 10, title: '게시판 테스트 입니다', author: '관리자', createTime: '2025-05-18T12:00:00', viewCount: 42 },
-      { id: 9, title: '여행 정보 공유합니다', author: '여행자123', createTime: '2025-05-15T15:30:00', viewCount: 28 },
-      { id: 8, title: '제주도 맛집 추천해주세요', author: '맛집탐험가', createTime: '2025-05-10T09:45:00', viewCount: 76 },
-      { id: 7, title: '서울 근교 당일치기 여행', author: '주말여행러', createTime: '2025-05-08T18:12:00', viewCount: 35 },
-      { id: 6, title: '여름 휴가 계획 공유', author: '방학맞이', createTime: '2025-05-05T11:24:00', viewCount: 19 },
-      { id: 5, title: '해외여행 필수 준비물', author: '세계일주', createTime: '2025-05-03T14:08:00', viewCount: 88 },
-      { id: 4, title: '국내 캠핑장 추천', author: '캠핑러버', createTime: '2025-05-01T10:15:00', viewCount: 45 },
-      { id: 3, title: '혼자 떠나는 여행 꿀팁', author: '솔로트래블러', createTime: '2025-04-29T16:30:00', viewCount: 92 },
-      { id: 2, title: '가족 여행지 추천', author: '행복한가족', createTime: '2025-04-25T13:20:00', viewCount: 51 },
-      { id: 1, title: '첫 번째 공지사항입니다', author: '관리자', createTime: '2025-04-20T09:00:00', viewCount: 120 },
-    ];
+    //const dummyPosts = [
+    //  { id: 10, title: '게시판 테스트 입니다', author: '관리자', createTime: '2025-05-18T12:00:00', viewCount: 42 },
+    //  { id: 9, title: '여행 정보 공유합니다', author: '여행자123', createTime: '2025-05-15T15:30:00', viewCount: 28 },
+    //  { id: 8, title: '제주도 맛집 추천해주세요', author: '맛집탐험가', createTime: '2025-05-10T09:45:00', viewCount: 76 },
+    //  { id: 7, title: '서울 근교 당일치기 여행', author: '주말여행러', createTime: '2025-05-08T18:12:00', viewCount: 35 },
+    //  { id: 6, title: '여름 휴가 계획 공유', author: '방학맞이', createTime: '2025-05-05T11:24:00', viewCount: 19 },
+    //  { id: 5, title: '해외여행 필수 준비물', author: '세계일주', createTime: '2025-05-03T14:08:00', viewCount: 88 },
+    //  { id: 4, title: '국내 캠핑장 추천', author: '캠핑러버', createTime: '2025-05-01T10:15:00', viewCount: 45 },
+    //  { id: 3, title: '혼자 떠나는 여행 꿀팁', author: '솔로트래블러', createTime: '2025-04-29T16:30:00', viewCount: 92 },
+    //  { id: 2, title: '가족 여행지 추천', author: '행복한가족', createTime: '2025-04-25T13:20:00', viewCount: 51 },
+    //  { id: 1, title: '첫 번째 공지사항입니다', author: '관리자', createTime: '2025-04-20T09:00:00', viewCount: 120 },
+    //];
 
-    posts.value = dummyPosts;
-    totalPosts.value = 23; // 총 23개의 게시글이 있다고 가정
+    //posts.value = dummyPosts;
+    //totalPosts.value = 23; // 총 23개의 게시글이 있다고 가정
   } catch (error) {
     console.error('게시글 로드 실패:', error);
   }

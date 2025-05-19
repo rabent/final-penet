@@ -10,7 +10,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/boards")
@@ -24,13 +28,16 @@ public class BoardController {
     }
 
     @PostMapping
-    public ResponseEntity<BoardResponseDto> boardPost(@ModelAttribute @Valid BoardRequestDto dto, Integer id) {//jwt 토큰 내부의 user id를 받아올 방법 필요
-        return ResponseEntity.ok(boardService.saveBoard(dto,id));
+    public ResponseEntity<BoardResponseDto> boardPost(@RequestBody @Valid BoardRequestDto dto,@AuthenticationPrincipal String userId) {//jwt 토큰 내부의 user id를 받아올 방법 필요
+        return ResponseEntity.ok(boardService.saveBoard(dto,Integer.valueOf(userId)));
     }
 
     @GetMapping("/{boardId}")
-    public ResponseEntity<BoardResponseDto> boardDetail(@PathVariable Integer boardId) {
-        return ResponseEntity.ok(boardService.getBoardDetail(boardId));
+    public ResponseEntity<Map<String, Object>> boardDetail(@PathVariable Integer boardId, @AuthenticationPrincipal String userId) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("board",boardService.getBoardDetail(boardId));
+        response.put("userId",Integer.valueOf(userId));
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{boardId}")
@@ -39,8 +46,8 @@ public class BoardController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{boardId}")
-    public ResponseEntity<BoardResponseDto> boardUpdate(@PathVariable Integer boardId, @ModelAttribute @Valid BoardUpdateDto dto) {
+    @PutMapping("/edit/{boardId}")
+    public ResponseEntity<BoardResponseDto> boardUpdate(@PathVariable Integer boardId, @RequestBody @Valid BoardUpdateDto dto) {
         return ResponseEntity.ok(boardService.updateBoard(dto,boardId));
     }
 }
