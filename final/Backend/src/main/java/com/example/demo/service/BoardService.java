@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.model.dto.Board.BoardRequestDto;
 import com.example.demo.model.dto.Board.BoardResponseDto;
 import com.example.demo.model.dto.Board.BoardUpdateDto;
 import com.example.demo.model.entity.Board;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -90,14 +92,17 @@ public class BoardService {
     /**
      * 새 게시글 저장
      *
-     * @param board 저장할 게시글 엔티티
+     * @param dto 저장할 게시글 dto
      * @return 저장된 게시글 엔티티
      */
     @Transactional
-    public BoardResponseDto saveBoard(Board board, Integer userId) {
-        boardRepository.save(board);
+    public BoardResponseDto saveBoard(BoardRequestDto dto, Integer userId) {
+        Board board=dto.toEntity();
         User user=userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         user.addBoard(board);
+        board.setUser(user);
+        board.setHit(0); board.setCreatedAt(LocalDateTime.now());
+        boardRepository.save(board);
         return BoardResponseDto.from(board);
     }
 
@@ -108,6 +113,12 @@ public class BoardService {
      */
     @Transactional
     public void deleteBoard(Integer boardId) {
+        Board board=boardRepository.findById(boardId).orElseThrow(()->new EntityNotFoundException("게시글을 찾을 수 없습니다."));
+        User user= board.getUser();
+        if(user!=null) {
+            user.getBoards().remove(board);
+        }
+        board.setUser(null);
         boardRepository.deleteById(boardId);
     }
 

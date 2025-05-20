@@ -14,18 +14,19 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.Singular;
+import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "board")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "user")
 @Builder
+@EqualsAndHashCode(exclude = "user")
 public class Board {
 
     @Id
@@ -36,6 +37,7 @@ public class Board {
     // User 엔티티와의 다대일(N:1) 관계 설정
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = true) // 외래 키 컬럼명
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private User user;
 
     @OneToMany(mappedBy="board",fetch = FetchType.LAZY)
@@ -48,10 +50,10 @@ public class Board {
     @Column(name = "content", length = 900, nullable = false)
     private String content;
     
-    @Column(name = "hit")
+    @Column(name = "hit", nullable = false)
     private Integer hit;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     public void addImage(BImage image) {
