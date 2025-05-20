@@ -24,7 +24,7 @@ import com.example.demo.repository.AttractionRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)  // Spring Security 필터 비활성화
+@AutoConfigureMockMvc
 //@Transactional
 public class AttractionControllerIntegrationTest {
 

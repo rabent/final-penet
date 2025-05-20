@@ -30,9 +30,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -226,7 +224,8 @@ public class BoardServiceTest {
         Board resBoard=new Board();
         resBoard.setTitle("새 게시글");
         resBoard.setContent("새 내용");
-
+        resBoard.setUser(testUser);
+        resBoard.setHit(0); resBoard.setCreatedAt(LocalDateTime.now());
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
         when(boardRepository.save(any(Board.class))).thenReturn(resBoard);
@@ -236,7 +235,11 @@ public class BoardServiceTest {
 
         // then
         assertThat(result).isNotNull();
-        verify(boardRepository, times(1)).save(resBoard);
+        verify(boardRepository, times(1)).save(argThat(saveBoard ->
+                "새 게시글".equals(saveBoard.getTitle()) &&
+                "새 내용".equals(saveBoard.getContent()) &&
+                        saveBoard.getHit() == 0 &&
+                        saveBoard.getCreatedAt() != null));
         verify(userRepository, times(1)).findById(userId);
     }
 

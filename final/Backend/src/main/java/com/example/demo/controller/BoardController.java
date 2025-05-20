@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +28,7 @@ public class BoardController {
         return ResponseEntity.ok(boardService.getAllBoardSummaries(page));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping
     public ResponseEntity<BoardResponseDto> boardPost(@RequestBody @Valid BoardRequestDto dto,@AuthenticationPrincipal String userId) {//jwt 토큰 내부의 user id를 받아올 방법 필요
         return ResponseEntity.ok(boardService.saveBoard(dto,Integer.valueOf(userId)));
@@ -36,10 +38,11 @@ public class BoardController {
     public ResponseEntity<Map<String, Object>> boardDetail(@PathVariable Integer boardId, @AuthenticationPrincipal String userId) {
         Map<String, Object> response = new HashMap<>();
         response.put("board",boardService.getBoardDetail(boardId));
-        response.put("userId",Integer.valueOf(userId));
+        if(userId!=null && !userId.equals("anonymousUser")) response.put("userId",Integer.valueOf(userId));
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{boardId}")
     public ResponseEntity<?> boardDelete(@PathVariable Integer boardId) {
         boardService.deleteBoard(boardId);
