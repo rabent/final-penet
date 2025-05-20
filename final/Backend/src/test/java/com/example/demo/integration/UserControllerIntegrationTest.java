@@ -16,6 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -83,14 +86,17 @@ public class UserControllerIntegrationTest {
 
     @Test
     void updateUser_updatesExistingUser() throws Exception {
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("name", "수정된 사용자");
-        params.add("address", "수정된 주소");
-        params.add("number", "010-1111-2222");
+        Map<String, String> boardRequest = new HashMap<>();
+        boardRequest.put("name", "수정된 사용자");
+        boardRequest.put("address", "수정된 주소");
+        boardRequest.put("number", "010-1111-2222");
+        // ObjectMapper를 사용하여 JSON 문자열로 변환
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestBody = objectMapper.writeValueAsString(boardRequest);
 
         mockMvc.perform(put("/users/{userId}", testUser.getId())
-                .params(params)
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .content(requestBody)
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is("수정된 사용자")))
                 .andExpect(jsonPath("$.address", is("수정된 주소")))
