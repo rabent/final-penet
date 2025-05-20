@@ -163,8 +163,7 @@ public class TripPlanServiceTest {
 
         TripPlanResponseDto responseDto = new TripPlanResponseDto(
                 "부산 여행",
-                "부산 여행 계획입니다.",
-                null
+                "부산 여행 계획입니다."
         );
 
         when(userRepository.findById(anyInt())).thenReturn(Optional.of(testUser));
