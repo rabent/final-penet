@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,13 +22,13 @@ public class TripPlanController {
     private final TripPlanService tripPlanService;
     //jwt token에서  user id 파싱 필요
     @GetMapping
-    public ResponseEntity<Page<TripPlanSummaryDto>> planSummary(Integer userId, @RequestParam(defaultValue = "0") int page) {
-        return ResponseEntity.ok(tripPlanService.getUserTripPlans(userId, page));
+    public ResponseEntity<Page<TripPlanSummaryDto>> planSummary(@AuthenticationPrincipal String userId, @RequestParam(defaultValue = "0") int page) {
+        return ResponseEntity.ok(tripPlanService.getUserTripPlans(Integer.valueOf(userId), page));
     }
 
     @PostMapping
-    public ResponseEntity<TripPlanService.TripPlanWithSnippetsDto> planPost(@RequestBody @Valid TripPlanRequestDto dto, Integer userId) {
-        return ResponseEntity.ok(tripPlanService.saveTripPlan(dto, userId));
+    public ResponseEntity<TripPlanService.TripPlanWithSnippetsDto> planPost(@RequestBody @Valid TripPlanRequestDto dto, @AuthenticationPrincipal String userId) {
+        return ResponseEntity.ok(tripPlanService.saveTripPlan(dto, Integer.valueOf(userId)));
     }
 
     @PutMapping("/{planId}")

@@ -1,7 +1,5 @@
 package com.example.demo.integration;
 
-import com.example.demo.model.dto.Board.BoardRequestDto;
-import com.example.demo.model.dto.Board.BoardUpdateDto;
 import com.example.demo.model.entity.Board;
 import com.example.demo.model.entity.User;
 import com.example.demo.repository.BoardRepository;
@@ -16,11 +14,18 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.http.MediaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.hamcrest.Matchers.is;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
@@ -28,7 +33,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 //@Transactional
 public class BoardControllerIntegrationTest {
 
@@ -46,6 +51,7 @@ public class BoardControllerIntegrationTest {
 
     private User testUser;
     private Board testBoard;
+    private Authentication authentication;
 
     @BeforeEach
     void setUp() {
@@ -74,6 +80,7 @@ public class BoardControllerIntegrationTest {
                 .build();
         testBoard = boardRepository.save(testBoard);
         testUser.getBoards().add(testBoard);
+        authentication = new TestingAuthenticationToken(testUser.getId().toString(), null, "ROLE_USER");
     }
 
     @Test
@@ -88,16 +95,19 @@ public class BoardControllerIntegrationTest {
 
     @Test
     void boardPost_createsNewBoard() throws Exception {
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("title", "새 게시글");
-        params.add("content", "새 게시글 내용입니다.");
+        Map<String, String> boardRequest = new HashMap<>();
+        boardRequest.put("title", "새 게시글");
+        boardRequest.put("content", "새 게시글 내용입니다.");
 
-        Authentication authentication = new TestingAuthenticationToken(testUser.getId().toString(), null, "ROLE_USER");
+        // ObjectMapper를 사용하여 JSON 문자열로 변환
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestBody = objectMapper.writeValueAsString(boardRequest);
+
 
         mockMvc.perform(post("/boards")
-                .params(params)
-                .with(authentication(authentication))
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+                .with(authentication(authentication)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title", is("새 게시글")))
                 .andExpect(jsonPath("$.content", is("새 게시글 내용입니다.")));
@@ -108,20 +118,23 @@ public class BoardControllerIntegrationTest {
         mockMvc.perform(get("/boards/{boardId}", testBoard.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.title", is("테스트 게시글")))
-                .andExpect(jsonPath("$.content", is("테스트 내용입니다.")))
-                .andExpect(jsonPath("$.username", is("테스트 사용자")));
+                .andExpect(jsonPath("$.board.title", is("테스트 게시글")))
+                .andExpect(jsonPath("$.board.content", is("테스트 내용입니다.")))
+                .andExpect(jsonPath("$.board.username", is("테스트 사용자")));
     }
 
     @Test
     void boardUpdate_updatesExistingBoard() throws Exception {
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("title", "수정된 게시글");
-        params.add("content", "수정된 내용입니다.");
+        Map<String, String> boardRequest = new HashMap<>();
+        boardRequest.put("title", "수정된 게시글");
+        boardRequest.put("content", "수정된 내용입니다.");
 
-        mockMvc.perform(put("/boards/{boardId}", testBoard.getId())
-                .params(params)
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestBody = objectMapper.writeValueAsString(boardRequest);
+        mockMvc.perform(put("/boards/edit/{boardId}", testBoard.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(authentication(authentication))
+                        .content(requestBody))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title", is("수정된 게시글")))
                 .andExpect(jsonPath("$.content", is("수정된 내용입니다.")));
@@ -129,7 +142,8 @@ public class BoardControllerIntegrationTest {
 
     @Test
     void boardDelete_deletesBoard() throws Exception {
-        mockMvc.perform(delete("/boards/{boardId}", testBoard.getId()))
+        mockMvc.perform(delete("/boards/{boardId}", testBoard.getId())
+                .with(authentication(authentication)))
                 .andExpect(status().isNoContent());
 
         // 삭제 확인
