@@ -10,6 +10,7 @@ import Board from '../views/BoardView.vue'
 import BoardWrite from '../views/BoardWriteView.vue'
 import BoardDetail from '../views/BoardDetailView.vue'
 import BoardEditView from '../views/BoardEditView.vue'
+import Attractions from '../views/AttractionView.vue'
 
 const routes = [
   {
@@ -56,12 +57,11 @@ const routes = [
       requiresAuth: true // 인증이 필요한 페이지로 표시
     }
   }
-  // ,{
-  //   path: '/attractions',
-  //   name: 'Attractions',
-  //   // 지연 로딩 사용 (코드 스플리팅)
-  //   component: () => import(/* webpackChunkName: "attractions" */ '../views/Attractions.vue')
-  // },
+    ,{
+    path: '/attractions',
+    name: 'Attractions',
+    component: Attractions
+  },
   // {
   //   path: '/board',
   //   name: 'Board',
