@@ -100,7 +100,7 @@
 <script setup>
 import { reactive, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'  // axios import 추가
+import api from '@/utils/axios'  // axios import 추가
 
 const router = useRouter()
 const passwordConfirm = ref('')
@@ -185,7 +185,7 @@ const handleRegister = async () => {
     }
 
     // API 호출
-    const response = await axios.post('http://localhost:8080/api/users', formData)
+    const response = await api.post('/users', formData)
 
     if (response.data) {
       alert('회원가입이 완료되었습니다.')
