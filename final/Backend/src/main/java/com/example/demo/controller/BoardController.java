@@ -117,4 +117,20 @@ public class BoardController {
             @RequestBody @Valid BoardUpdateDto dto) {
         return ResponseEntity.ok(boardService.updateBoard(dto, boardId));
     }
+
+    @GetMapping("/user/{userId}")
+    @Operation(summary = "사용자 별 게시글 목록 조회", description = "페이징 처리된 사용자가 작성한 게시글 요약 정보 목록을 제공합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공",
+                    content = @Content(schema = @Schema(implementation = Page.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    public ResponseEntity<Page<BoardSummaryDto>> boardByUser(
+            @Parameter(description = "페이지 번호 (0부터 시작)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "사용자 ID", hidden = true)
+            @PathVariable Integer userId
+            ) {
+        return ResponseEntity.ok(boardService.getBoardsByUser(userId,page));
+    }
 }
