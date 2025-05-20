@@ -18,8 +18,6 @@ public class UserUpdateDto {
 
     @Size(max = 15, message = "이름은 15자 이하로 입력해주세요.")
     private String name;
-    
-    
     // 비밀번호는 변경 시에만 입력하도록 설계 (필수 아님)
     @Size(min = 8, max = 15, message = "비밀번호는 8자 이상 15자 이하로 입력해주세요.")
     private String password;

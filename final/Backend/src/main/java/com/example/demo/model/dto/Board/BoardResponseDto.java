@@ -17,6 +17,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BoardResponseDto {
+    private Integer userId;
     
     private String username;
  
@@ -38,12 +39,13 @@ public class BoardResponseDto {
             }
         }
         return new BoardResponseDto(
-            board.getUser() != null ? board.getUser().getName() : null,
-            list,
-            board.getTitle(),
-            board.getContent(),
-            board.getHit(),
-            board.getCreatedAt()
+                board.getUser() != null ? board.getUser().getId() : null,
+                board.getUser() != null ? board.getUser().getName() : null,
+                list,
+                board.getTitle(),
+                board.getContent(),
+                board.getHit(),
+                board.getCreatedAt()
         );
     }
 }

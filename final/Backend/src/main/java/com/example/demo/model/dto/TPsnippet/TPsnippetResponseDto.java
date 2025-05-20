@@ -19,6 +19,5 @@ public class TPsnippetResponseDto {
     private String schedule;
 
     private AttractionSummaryDto attraction;
-
     //service 단에서 attraction을 dto로 변환해서 넘겨주는 로직 필요
 }

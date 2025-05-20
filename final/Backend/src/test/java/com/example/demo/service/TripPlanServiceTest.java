@@ -27,18 +27,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,469 +57,374 @@ public class TripPlanServiceTest {
     private TripPlanService tripPlanService;
 
     private User testUser;
-    private TripPlan testTripPlan1;
-    private TripPlan testTripPlan2;
-    private TripSnippet testTripSnippet1;
-    private TripSnippet testTripSnippet2;
+    private TripPlan testTripPlan;
+    private TripSnippet testTripSnippet;
     private Attraction testAttraction;
+    private AttractionSummaryDto testAttractionSummaryDto;
+    private List<TPsnippetSummaryDto> testSnippetSummaries;
     private TripPlanRequestDto tripPlanRequestDto;
     private TripPlanUpdateDto tripPlanUpdateDto;
-    private TPsnippetRequestDto tPsnippetRequestDto;
-    private TPsnippetUpdateDto tPsnippetUpdateDto;
-    private List<TripPlanSummaryDto> tripPlanSummaryDtos;
-    private List<TPsnippetSummaryDto> tPsnippetSummaryDtos;
-    private Page<TripPlanSummaryDto> tripPlanSummaryDtoPage;
-
-    private static final int DEFAULT_PAGE_SIZE = 8;
+    private TPsnippetRequestDto tpSnippetRequestDto;
+    private TPsnippetUpdateDto tpSnippetUpdateDto;
 
     @BeforeEach
     void setUp() {
-        // 테스트 사용자 생성
-        testUser = new User();
-        testUser.setId(1);
-        testUser.setName("testUser");
-        testUser.setEmail("test@example.com");
+        // 테스트용 User 엔티티 생성
+        testUser = User.builder()
+                .id(1)
+                .name("테스트사용자")
+                .email("test@example.com")
+                .build();
 
-        // 테스트 관광지 생성
-        testAttraction = new Attraction();
-        testAttraction.setNo(1);
-        testAttraction.setTitle("테스트 관광지");
-        testAttraction.setAddr1("테스트 주소");
-        testAttraction.setFirstImage1("이미지URL");
+        // 테스트용 Attraction 엔티티 생성
+        testAttraction = Attraction.builder()
+                .no(101)
+                .title("테스트 관광지")
+                .addr1("서울시 종로구")
+                .tel("02-1234-5678")
+                .firstImage1("image_url.jpg")
+                .build();
 
-        // 테스트 여행 계획 생성
-        testTripPlan1 = new TripPlan();
-        testTripPlan1.setId(1);
-        testTripPlan1.setPlanName("테스트 여행 계획 1");
-        testTripPlan1.setPlan("테스트 여행 계획 내용 1");
-        testTripPlan1.setUser(testUser);
+        // 테스트용 AttractionSummaryDto 생성
+        testAttractionSummaryDto = new AttractionSummaryDto(
+                101,
+                "테스트 관광지",
+                "image_url.jpg",
+                "서울시 종로구",
+                "02-1234-5678"
+        );
 
-        testTripPlan2 = new TripPlan();
-        testTripPlan2.setId(2);
-        testTripPlan2.setPlanName("테스트 여행 계획 2");
-        testTripPlan1.setPlan("테스트 여행 계획 내용 2");
-        testTripPlan2.setUser(testUser);
+        // 테스트용 TripPlan 엔티티 생성
+        testTripPlan = TripPlan.builder()
+                .id(1)
+                .planName("서울 여행")
+                .plan("서울 여행 계획입니다.")
+                .user(testUser)
+                .build();
 
-        // 테스트 여행 스니펫 생성
-        testTripSnippet1 = new TripSnippet();
-        testTripSnippet1.setId(1);
-        testTripSnippet1.setPrice("10000원");
-        testTripSnippet1.setSchedule("테스트 스니펫 계획 1");
-        testTripSnippet1.setPlan(testTripPlan1);
-        testTripSnippet1.setAttraction(testAttraction);
+        // 테스트용 TripSnippet 엔티티 생성
+        testTripSnippet = TripSnippet.builder()
+                .id(1)
+                .price("10000원")
+                .schedule("첫째날 오전")
+                .plan(testTripPlan)
+                .attraction(testAttraction)
+                .build();
 
-        testTripSnippet2 = new TripSnippet();
-        testTripSnippet2.setId(2);
-        testTripSnippet2.setPrice("20000원");
-        testTripSnippet2.setSchedule("테스트 스니펫 계획 2");
-        testTripSnippet2.setPlan(testTripPlan1);
-        testTripSnippet2.setAttraction(testAttraction);
+        // 테스트용 스니펫 요약 DTO 리스트 생성
+        testSnippetSummaries = new ArrayList<>();
+        TPsnippetSummaryDto snippetSummaryDto = new TPsnippetSummaryDto(
+                1,
+                "10000원",
+                testAttractionSummaryDto
+        );
+        testSnippetSummaries.add(snippetSummaryDto);
 
-        // 테스트 DTO 생성
-        tripPlanRequestDto = new TripPlanRequestDto();
-        tripPlanRequestDto.setPlanName("새 여행 계획");
-        tripPlanRequestDto.setPlan("새 여행 계획 내용");
-
-        tripPlanUpdateDto = new TripPlanUpdateDto();
-        tripPlanUpdateDto.setPlanName("수정된 여행 계획");
-        tripPlanUpdateDto.setPlan("수정된 여행 계획 내용");
-
-        tPsnippetRequestDto = new TPsnippetRequestDto();
-        tPsnippetRequestDto.setPrice("15000원");
-        tPsnippetRequestDto.setSchedule("새 여행 스니펫 내용");
-
-        tPsnippetUpdateDto = new TPsnippetUpdateDto();
-        tPsnippetUpdateDto.setPrice("25000원");
-        tPsnippetUpdateDto.setSchedule("수정된 여행 스니펫 내용");
-
-        // 테스트 DTO 리스트 생성
-        TripPlanSummaryDto summaryDto1 = new TripPlanSummaryDto(1, "테스트 여행 계획 1", "테스트 여행 계획 내용 1");
-        TripPlanSummaryDto summaryDto2 = new TripPlanSummaryDto(2, "테스트 여행 계획 2", "테스트 여행 계획 내용 2");
-        tripPlanSummaryDtos = Arrays.asList(summaryDto1, summaryDto2);
-        tripPlanSummaryDtoPage = new PageImpl<>(tripPlanSummaryDtos);
-
-        AttractionSummaryDto attractionSummaryDto = new AttractionSummaryDto(1, "테스트 관광지", "이미지URL", "테스트 주소", "010303212312");
-        TPsnippetSummaryDto snippetSummaryDto1 = new TPsnippetSummaryDto(1, attractionSummaryDto.getTitle(), "10000원");
-        TPsnippetSummaryDto snippetSummaryDto2 = new TPsnippetSummaryDto(2, attractionSummaryDto.getTitle(), "20000원");
-        tPsnippetSummaryDtos = Arrays.asList(snippetSummaryDto1, snippetSummaryDto2);
+        // 요청 DTO 생성
+        tripPlanRequestDto = new TripPlanRequestDto("부산 여행", "부산 여행 계획입니다.");
+        tripPlanUpdateDto = new TripPlanUpdateDto("제주 여행", "제주 여행 계획으로 변경합니다.");
+        tpSnippetRequestDto = new TPsnippetRequestDto("20000원", "둘째날 오후", 101);
+        tpSnippetUpdateDto = new TPsnippetUpdateDto("30000원", "셋째날 오전", 101);
     }
 
     @Test
-    @DisplayName("사용자별 여행 계획 목록을 페이지네이션하여 조회한다")
-    void getUserTripPlans() {
-        // given
-        Integer userId = 1;
-        int page = 0;
-        Pageable pageable = PageRequest.of(page, DEFAULT_PAGE_SIZE, Sort.by("id").descending());
+    @DisplayName("사용자별 여행 계획 목록 조회 테스트")
+    void getUserTripPlansTest() {
+        // Given
+        List<TripPlanSummaryDto> summaryDtos = Arrays.asList(
+                new TripPlanSummaryDto(1, "서울 여행", "서울 여행 계획입니다.")
+        );
+        Page<TripPlanSummaryDto> expectedPage = new PageImpl<>(summaryDtos);
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(tripPlanRepository.findAllByUser(testUser, pageable)).thenReturn(tripPlanSummaryDtoPage);
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(testUser));
+        when(tripPlanRepository.findAllByUser(any(User.class), any(Pageable.class))).thenReturn(expectedPage);
 
-        // when
-        Page<TripPlanSummaryDto> result = tripPlanService.getUserTripPlans(userId, page);
+        // When
+        Page<TripPlanSummaryDto> result = tripPlanService.getUserTripPlans(1, 0);
 
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(2);
-        assertThat(result.getContent().get(0).getPlanName()).isEqualTo("테스트 여행 계획 1");
-        assertThat(result.getContent().get(1).getPlanName()).isEqualTo("테스트 여행 계획 2");
-
-        verify(userRepository, times(1)).findById(userId);
-        verify(tripPlanRepository, times(1)).findAllByUser(testUser, pageable);
+        // Then
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        assertEquals("서울 여행", result.getContent().get(0).getPlanName());
+        verify(userRepository, times(1)).findById(1);
+        verify(tripPlanRepository, times(1)).findAllByUser(eq(testUser), any(Pageable.class));
     }
 
     @Test
-    @DisplayName("존재하지 않는 사용자 ID로 여행 계획을 조회하면 예외가 발생한다")
-    void getUserTripPlans_UserNotFound() {
-        // given
-        Integer userId = 999;
-        int page = 0;
+    @DisplayName("여행 계획 저장 테스트")
+    void saveTripPlanTest() {
+        // Given
+        TripPlan newPlan = TripPlan.builder()
+                .id(2)
+                .planName("부산 여행")
+                .plan("부산 여행 계획입니다.")
+                .user(testUser)
+                .build();
 
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        TripPlanResponseDto responseDto = new TripPlanResponseDto(
+                "부산 여행",
+                "부산 여행 계획입니다.",
+                null
+        );
 
-        // when & then
-        assertThrows(EntityNotFoundException.class, () -> {
-            tripPlanService.getUserTripPlans(userId, page);
-        });
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(testUser));
+        when(tripPlanRepository.save(any(TripPlan.class))).thenReturn(newPlan);
+        when(tripPlanRepository.findById(anyInt())).thenReturn(Optional.of(newPlan));
+        when(tripSnippetRepository.getTripSnippetSummaryById(any(TripPlan.class))).thenReturn(new ArrayList<>());
 
-        verify(userRepository, times(1)).findById(userId);
-    }
+        // When
+        TripPlanService.TripPlanWithSnippetsDto result = tripPlanService.saveTripPlan(tripPlanRequestDto, 1);
 
-    @Test
-    @DisplayName("여행 계획을 저장한다")
-    void saveTripPlan() {
-        // given
-        Integer userId = 1;
-        TripPlan newTripPlan = new TripPlan();
-        newTripPlan.setPlanName("새 여행 계획");
-        newTripPlan.setPlan("새 여행 계획 내용");
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(tripPlanRepository.save(any(TripPlan.class))).thenReturn(newTripPlan);
-
-        // when
-        TripPlanResponseDto result = tripPlanService.saveTripPlan(tripPlanRequestDto, userId);
-
-        // then
-        assertThat(result).isNotNull();
-        verify(userRepository, times(1)).findById(userId);
+        // Then
+        assertNotNull(result);
+        assertEquals("부산 여행", result.getPlan().getPlanName());
+        assertEquals("부산 여행 계획입니다.", result.getPlan().getPlan());
+        verify(userRepository, times(1)).findById(1);
         verify(tripPlanRepository, times(1)).save(any(TripPlan.class));
+        verify(tripPlanRepository, times(1)).findById(2);
     }
 
     @Test
-    @DisplayName("존재하지 않는 사용자 ID로 여행 계획을 저장하면 예외가 발생한다")
-    void saveTripPlan_UserNotFound() {
-        // given
-        Integer userId = 999;
+    @DisplayName("여행 계획 조회 테스트")
+    void getTripPlanByIdTest() {
+        // Given
+        when(tripPlanRepository.findById(anyInt())).thenReturn(Optional.of(testTripPlan));
+        when(tripSnippetRepository.getTripSnippetSummaryById(any(TripPlan.class))).thenReturn(testSnippetSummaries);
 
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        // When
+        TripPlanService.TripPlanWithSnippetsDto result = tripPlanService.getTripPlanById(1);
 
-        // when & then
-        assertThrows(EntityNotFoundException.class, () -> {
-            tripPlanService.saveTripPlan(tripPlanRequestDto, userId);
-        });
-
-        verify(userRepository, times(1)).findById(userId);
+        // Then
+        assertNotNull(result);
+        assertEquals("서울 여행", result.getPlan().getPlanName());
+        assertEquals(1, result.getSnippets().size());
+        assertEquals("테스트 관광지", result.getSnippets().get(0).getAttraction().getTitle());
+        assertEquals("10000원", result.getSnippets().get(0).getPrice());
+        verify(tripPlanRepository, times(1)).findById(1);
+        verify(tripSnippetRepository, times(1)).getTripSnippetSummaryById(testTripPlan);
     }
 
     @Test
-    @DisplayName("ID로 여행 계획을 조회한다")
-    void getTripPlanById() {
-        // given
-        Integer planId = 1;
+    @DisplayName("여행 계획 업데이트 테스트")
+    void updateTripPlanTest() {
+        // Given
+        when(tripPlanRepository.findById(anyInt())).thenReturn(Optional.of(testTripPlan));
+        when(tripSnippetRepository.getTripSnippetSummaryById(any(TripPlan.class))).thenReturn(testSnippetSummaries);
 
-        when(tripPlanRepository.findById(planId)).thenReturn(Optional.of(testTripPlan1));
-        when(tripSnippetRepository.getTripSnippetSummaryById(testTripPlan1)).thenReturn(tPsnippetSummaryDtos);
+        // When
+        TripPlanService.TripPlanWithSnippetsDto result = tripPlanService.UpdateTripPlan(tripPlanUpdateDto, 1);
 
-        // when
-        TripPlanService.TripPlanWithSnippetsDto result = tripPlanService.getTripPlanById(planId);
-
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getPlan()).isEqualTo(testTripPlan1);
-        assertThat(result.getSnippets()).hasSize(2);
-        assertThat(result.getSnippets().get(0).getAttractionName()).isEqualTo("테스트 관광지");
-
-        verify(tripPlanRepository, times(1)).findById(planId);
-        verify(tripSnippetRepository, times(1)).getTripSnippetSummaryById(testTripPlan1);
+        // Then
+        assertNotNull(result);
+        assertEquals("제주 여행", testTripPlan.getPlanName());
+        assertEquals("제주 여행 계획으로 변경합니다.", testTripPlan.getPlan());
+        verify(tripPlanRepository, times(2)).findById(1);
+        verify(tripSnippetRepository, times(1)).getTripSnippetSummaryById(testTripPlan);
     }
 
     @Test
-    @DisplayName("존재하지 않는 ID로 여행 계획을 조회하면 null을 반환한다")
-    void getTripPlanById_NotFound() {
-        // given
-        Integer planId = 999;
+    @DisplayName("여행 계획 삭제 테스트")
+    void deleteTripPlanTest() {
+        // Given
+        when(tripPlanRepository.findById(anyInt())).thenReturn(Optional.of(testTripPlan));
+        doNothing().when(tripPlanRepository).deleteById(anyInt());
 
-        when(tripPlanRepository.findById(planId)).thenReturn(Optional.empty());
+        // When
+        tripPlanService.deleteTripPlan(1);
 
-        // when
-        TripPlanService.TripPlanWithSnippetsDto result = tripPlanService.getTripPlanById(planId);
-
-        // then
-        assertNull(result);
-
-        verify(tripPlanRepository, times(1)).findById(planId);
+        // Then
+        assertNull(testTripPlan.getUser());
+        verify(tripPlanRepository, times(1)).findById(1);
+        verify(tripPlanRepository, times(1)).deleteById(1);
     }
 
     @Test
-    @DisplayName("여행 계획을 수정한다")
-    void updateTripPlan() {
-        // given
-        Integer planId = 1;
+    @DisplayName("여행 스니펫 저장 테스트")
+    void saveTripSnippetTest() {
+        // Given
+        when(tripPlanRepository.findById(anyInt())).thenReturn(Optional.of(testTripPlan));
+        when(attractionRepository.findById(anyInt())).thenReturn(Optional.of(testAttraction));
+        when(tripSnippetRepository.save(any(TripSnippet.class))).thenReturn(testTripSnippet);
 
-        when(tripPlanRepository.findById(planId)).thenReturn(Optional.of(testTripPlan1));
+        // When
+        TPsnippetResponseDto result = tripPlanService.saveTripSnippet(tpSnippetRequestDto, 1);
 
-        // when
-        tripPlanService.UpdateTripPlan(tripPlanUpdateDto, planId);
-
-        // then
-        verify(tripPlanRepository, times(1)).findById(planId);
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 ID로 여행 계획을 수정하면 예외가 발생한다")
-    void updateTripPlan_NotFound() {
-        // given
-        Integer planId = 999;
-
-        when(tripPlanRepository.findById(planId)).thenReturn(Optional.empty());
-
-        // when & then
-        assertThrows(EntityNotFoundException.class, () -> {
-            tripPlanService.UpdateTripPlan(tripPlanUpdateDto, planId);
-        });
-
-        verify(tripPlanRepository, times(1)).findById(planId);
-    }
-
-    @Test
-    @DisplayName("여행 계획을 삭제한다")
-    void deleteTripPlan() {
-        // given
-        Integer planId = 1;
-
-        // when
-        tripPlanService.deleteTripPlan(planId);
-
-        // then
-        verify(tripPlanRepository, times(1)).deleteById(planId);
-    }
-
-    @Test
-    @DisplayName("특정 여행 계획에 속한 스니펫 요약 정보를 조회한다")
-    void getTripSnippetSummaries() {
-        // given
-        Integer planId = 1;
-
-        when(tripPlanRepository.findById(planId)).thenReturn(Optional.of(testTripPlan1));
-        when(tripSnippetRepository.getTripSnippetSummaryById(testTripPlan1)).thenReturn(tPsnippetSummaryDtos);
-
-        // when
-        List<TPsnippetSummaryDto> result = tripPlanService.getTripSnippetSummaries(planId);
-
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).getAttractionName()).isEqualTo("테스트 관광지");
-        assertThat(result.get(0).getPrice()).isEqualTo("10000원");
-
-        verify(tripPlanRepository, times(1)).findById(planId);
-        verify(tripSnippetRepository, times(1)).getTripSnippetSummaryById(testTripPlan1);
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 여행 계획 ID로 스니펫을 조회하면 예외가 발생한다")
-    void getTripSnippetSummaries_PlanNotFound() {
-        // given
-        Integer planId = 999;
-
-        when(tripPlanRepository.findById(planId)).thenReturn(Optional.empty());
-
-        // when & then
-        assertThrows(EntityNotFoundException.class, () -> {
-            tripPlanService.getTripSnippetSummaries(planId);
-        });
-
-        verify(tripPlanRepository, times(1)).findById(planId);
-    }
-
-    @Test
-    @DisplayName("여행 스니펫을 저장한다")
-    void saveTripSnippet() {
-        // given
-        Integer attractionNo = 1;
-        Integer planId = 1;
-        TripSnippet newSnippet = new TripSnippet();
-        newSnippet.setPrice("15000원");
-        newSnippet.setSchedule("새 여행 스니펫 내용");
-        AttractionSummaryDto attractionSummaryDto = new AttractionSummaryDto(1, "테스트 관광지", "이미지URL", "테스트 주소", "010303212312");
-
-        when(tripPlanRepository.findById(planId)).thenReturn(Optional.of(testTripPlan1));
-        when(attractionRepository.findById(attractionNo)).thenReturn(Optional.of(testAttraction));
-        when(tripSnippetRepository.save(any(TripSnippet.class))).thenReturn(newSnippet);
-
-        // TPsnippetResponseDto 생성을 위한 모킹
-        mockStatic(AttractionSummaryDto.class);
-        when(AttractionSummaryDto.from(testAttraction)).thenReturn(attractionSummaryDto);
-
-        // when
-        TPsnippetResponseDto result = tripPlanService.saveTripSnippet(tPsnippetRequestDto, attractionNo, planId);
-
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getPrice()).isEqualTo("15000원");
-        assertThat(result.getSchedule()).isEqualTo("새 여행 스니펫 내용");
-        assertThat(result.getAttraction().getTitle()).isEqualTo("테스트 관광지");
-
-        verify(tripPlanRepository, times(1)).findById(planId);
-        verify(attractionRepository, times(1)).findById(attractionNo);
+        // Then
+        assertNotNull(result);
+        assertEquals("20000원", result.getPrice());
+        assertEquals("둘째날 오후", result.getSchedule());
+        assertEquals("테스트 관광지", result.getAttraction().getTitle());
+        verify(tripPlanRepository, times(1)).findById(1);
+        verify(attractionRepository, times(1)).findById(101);
         verify(tripSnippetRepository, times(1)).save(any(TripSnippet.class));
     }
 
     @Test
-    @DisplayName("존재하지 않는 여행 계획으로 스니펫을 저장하면 예외가 발생한다")
-    void saveTripSnippet_PlanNotFound() {
-        // given
-        Integer attractionNo = 1;
-        Integer planId = 999;
+    @DisplayName("여행 스니펫 조회 테스트")
+    void getTripSnippetTest() {
+        // Given
+        when(tripSnippetRepository.findById(anyInt())).thenReturn(Optional.of(testTripSnippet));
 
-        when(tripPlanRepository.findById(planId)).thenReturn(Optional.empty());
+        // When
+        TPsnippetResponseDto result = tripPlanService.getTripSnippet(1);
 
-        // when & then
-        assertThrows(EntityNotFoundException.class, () -> {
-            tripPlanService.saveTripSnippet(tPsnippetRequestDto, attractionNo, planId);
-        });
-
-        verify(tripPlanRepository, times(1)).findById(planId);
+        // Then
+        assertNotNull(result);
+        assertEquals("10000원", result.getPrice());
+        assertEquals("첫째날 오전", result.getSchedule());
+        assertEquals("테스트 관광지", result.getAttraction().getTitle());
+        verify(tripSnippetRepository, times(1)).findById(1);
     }
 
     @Test
-    @DisplayName("존재하지 않는 관광지로 스니펫을 저장하면 예외가 발생한다")
-    void saveTripSnippet_AttractionNotFound() {
-        // given
-        Integer attractionNo = 999;
-        Integer planId = 1;
+    @DisplayName("여행 스니펫 삭제 테스트")
+    void deleteTripSnippetTest() {
+        // Given
+        when(tripSnippetRepository.findById(anyInt())).thenReturn(Optional.of(testTripSnippet));
+        doNothing().when(tripSnippetRepository).deleteById(anyInt());
 
-        when(tripPlanRepository.findById(planId)).thenReturn(Optional.of(testTripPlan1));
-        when(attractionRepository.findById(attractionNo)).thenReturn(Optional.empty());
+        // When
+        tripPlanService.deleteTripSnippet(1);
 
-        // when & then
-        assertThrows(EntityNotFoundException.class, () -> {
-            tripPlanService.saveTripSnippet(tPsnippetRequestDto, attractionNo, planId);
-        });
-
-        verify(tripPlanRepository, times(1)).findById(planId);
-        verify(attractionRepository, times(1)).findById(attractionNo);
+        // Then
+        assertNull(testTripSnippet.getPlan());
+        verify(tripSnippetRepository, times(1)).findById(1);
+        verify(tripSnippetRepository, times(1)).deleteById(1);
     }
 
     @Test
-    @DisplayName("여행 스니펫을 삭제한다")
-    void deleteTripSnippet() {
-        // given
-        Integer snippetId = 1;
+    @DisplayName("여행 스니펫 업데이트 테스트")
+    void updateTripSnippetTest() {
+        // Given
+        when(tripSnippetRepository.findById(anyInt())).thenReturn(Optional.of(testTripSnippet));
+        when(attractionRepository.findById(anyInt())).thenReturn(Optional.of(testAttraction));
 
-        // when
-        tripPlanService.deleteTripSnippet(snippetId);
+        // When
+        TPsnippetResponseDto result = tripPlanService.UpdateTripSnippet(tpSnippetUpdateDto, 1);
 
-        // then
-        verify(tripSnippetRepository, times(1)).deleteById(snippetId);
+        // Then
+        assertNotNull(result);
+        assertEquals("30000원", result.getPrice());
+        assertEquals("셋째날 오전", result.getSchedule());
+        assertEquals("테스트 관광지", result.getAttraction().getTitle());
+        verify(tripSnippetRepository, times(1)).findById(1);
+        verify(attractionRepository, times(1)).findById(101);
     }
 
     @Test
-    @DisplayName("여행 스니펫을 수정한다")
-    void updateTripSnippet() {
-        // given
-        Integer snippetId = 1;
-        Integer attractionNo = 1;
+    @DisplayName("여행 계획과 스니펫 정보 함께 조회 테스트")
+    void getTripPlanWithSnippetsTest() {
+        // Given
+        when(tripPlanRepository.findById(anyInt())).thenReturn(Optional.of(testTripPlan));
+        when(tripSnippetRepository.getTripSnippetSummaryById(any(TripPlan.class))).thenReturn(testSnippetSummaries);
 
-        when(tripSnippetRepository.findById(snippetId)).thenReturn(Optional.of(testTripSnippet1));
-        when(attractionRepository.findById(attractionNo)).thenReturn(Optional.of(testAttraction));
+        // When
+        TripPlanService.TripPlanWithSnippetsDto result = tripPlanService.getTripPlanWithSnippets(1);
 
-        // when
-        tripPlanService.UpdateTripSnippet(tPsnippetUpdateDto, attractionNo, snippetId);
-
-        // then
-        verify(tripSnippetRepository, times(1)).findById(snippetId);
-        verify(attractionRepository, times(1)).findById(attractionNo);
+        // Then
+        assertNotNull(result);
+        assertEquals("서울 여행", result.getPlan().getPlanName());
+        assertEquals(1, result.getSnippets().size());
+        assertEquals("테스트 관광지", result.getSnippets().get(0).getAttraction().getTitle());
+        verify(tripPlanRepository, times(1)).findById(1);
+        verify(tripSnippetRepository, times(1)).getTripSnippetSummaryById(testTripPlan);
     }
 
     @Test
-    @DisplayName("존재하지 않는 스니펫을 수정하면 예외가 발생한다")
-    void updateTripSnippet_SnippetNotFound() {
-        // given
-        Integer snippetId = 999;
-        Integer attractionNo = 1;
+    @DisplayName("존재하지 않는 여행 계획 조회 시 예외 발생 테스트")
+    void getTripPlanWithSnippetsNotFoundTest() {
+        // Given
+        when(tripPlanRepository.findById(anyInt())).thenReturn(Optional.empty());
 
-        when(tripSnippetRepository.findById(snippetId)).thenReturn(Optional.empty());
-
-        // when & then
-        assertThrows(EntityNotFoundException.class, () -> {
-            tripPlanService.UpdateTripSnippet(tPsnippetUpdateDto, attractionNo, snippetId);
-        });
-
-        verify(tripSnippetRepository, times(1)).findById(snippetId);
+        // When
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> tripPlanService.getTripPlanWithSnippets(999)
+        );
+        // Then
+        assertEquals("여행 계획을 찾을 수 없습니다.", exception.getMessage());
+        verify(tripPlanRepository, times(1)).findById(999);
+        verify(tripSnippetRepository, never()).getTripSnippetSummaryById(any(TripPlan.class));
     }
 
     @Test
-    @DisplayName("여행 스니펫 수정 시 관광지를 변경하는 경우")
-    void updateTripSnippet_WithNewAttraction() {
-        // given
-        Integer snippetId = 1;
-        Integer attractionNo = 2;
-        Attraction newAttraction = new Attraction();
-        newAttraction.setNo(2);
-        newAttraction.setTitle("새 관광지");
+    @DisplayName("존재하지 않는 사용자로 여행 계획 조회 시 예외 발생 테스트")
+    void getUserTripPlansWithInvalidUserTest() {
+        // Given
+        when(userRepository.findById(anyInt())).thenReturn(Optional.empty());
 
-        when(tripSnippetRepository.findById(snippetId)).thenReturn(Optional.of(testTripSnippet1));
-        when(attractionRepository.findById(attractionNo)).thenReturn(Optional.of(newAttraction));
-
-        // when
-        tripPlanService.UpdateTripSnippet(tPsnippetUpdateDto, attractionNo, snippetId);
-
-        // then
-        verify(tripSnippetRepository, times(1)).findById(snippetId);
-        verify(attractionRepository, times(1)).findById(attractionNo);
-        assertThat(testTripSnippet1.getAttraction()).isEqualTo(newAttraction);
+        // When & Then
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> tripPlanService.getUserTripPlans(999, 0)
+        );
+        assertEquals("사용자를 찾을 수 없습니다.", exception.getMessage());
+        verify(userRepository, times(1)).findById(999);
+        verify(tripPlanRepository, never()).findAllByUser(any(User.class), any(Pageable.class));
     }
 
     @Test
-    @DisplayName("여행 스니펫 수정 시 관광지 정보가 null인 경우")
-    void updateTripSnippet_WithNullAttraction() {
-        // given
-        Integer snippetId = 1;
-        Integer attractionNo = null;
+    @DisplayName("존재하지 않는 여행 계획 수정 시 예외 발생 테스트")
+    void updateTripPlanWithInvalidIdTest() {
+        // Given
+        when(tripPlanRepository.findById(anyInt())).thenReturn(Optional.empty());
 
-        when(tripSnippetRepository.findById(snippetId)).thenReturn(Optional.of(testTripSnippet1));
-
-        // when
-        tripPlanService.UpdateTripSnippet(tPsnippetUpdateDto, attractionNo, snippetId);
-
-        // then
-        verify(tripSnippetRepository, times(1)).findById(snippetId);
-        // attractionRepository는 호출되지 않아야 함
-        assertThat(testTripSnippet1.getAttraction()).isEqualTo(testAttraction); // 기존 관광지 유지
+        // When & Then
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> tripPlanService.UpdateTripPlan(tripPlanUpdateDto, 999)
+        );
+        assertEquals("여행계획을 찾을 수 없습니다.", exception.getMessage());
+        verify(tripPlanRepository, times(1)).findById(999);
     }
 
     @Test
-    @DisplayName("여행 계획과 그에 속한 스니펫 정보를 함께 조회한다")
-    void getTripPlanWithSnippets() {
-        // given
-        Integer planId = 1;
+    @DisplayName("존재하지 않는 스니펫 조회 시 예외 발생 테스트")
+    void getTripSnippetWithInvalidIdTest() {
+        // Given
+        when(tripSnippetRepository.findById(anyInt())).thenReturn(Optional.empty());
 
-        when(tripPlanRepository.findById(planId)).thenReturn(Optional.of(testTripPlan1));
-        when(tripSnippetRepository.getTripSnippetSummaryById(testTripPlan1)).thenReturn(tPsnippetSummaryDtos);
+        // When & Then
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> tripPlanService.getTripSnippet(999)
+        );
+        assertEquals("계획 스니펫이 없습니다", exception.getMessage());
+        verify(tripSnippetRepository, times(1)).findById(999);
+    }
 
-        // when
-        TripPlanService.TripPlanWithSnippetsDto result = tripPlanService.getTripPlanWithSnippets(planId);
+    @Test
+    @DisplayName("존재하지 않는 관광지로 스니펫 저장 시 예외 발생 테스트")
+    void saveTripSnippetWithInvalidAttractionTest() {
+        // Given
+        when(tripPlanRepository.findById(anyInt())).thenReturn(Optional.of(testTripPlan));
+        when(attractionRepository.findById(anyInt())).thenReturn(Optional.empty());
 
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getPlan()).isEqualTo(testTripPlan1);
-        assertThat(result.getSnippets()).hasSize(2);
-        assertThat(result.getSnippets().get(0).getPrice()).isEqualTo("10000원");
-        assertThat(result.getSnippets().get(1).getPrice()).isEqualTo("20000원");
+        // When & Then
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> tripPlanService.saveTripSnippet(tpSnippetRequestDto, 1)
+        );
+        assertEquals("관광지를 찾을 수 없습니다.", exception.getMessage());
+        verify(tripPlanRepository, times(1)).findById(1);
+        verify(attractionRepository, times(1)).findById(101);
+        verify(tripSnippetRepository, never()).save(any(TripSnippet.class));
+    }
 
-        verify(tripPlanRepository, times(1)).findById(planId);
-        verify(tripSnippetRepository, times(1)).getTripSnippetSummaryById(testTripPlan1);
+    @Test
+    @DisplayName("존재하지 않는 여행 계획으로 스니펫 저장 시 예외 발생 테스트")
+    void saveTripSnippetWithInvalidPlanTest() {
+        // Given
+        when(tripPlanRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+        // When & Then
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> tripPlanService.saveTripSnippet(tpSnippetRequestDto, 999)
+        );
+        assertEquals("여행계획을 찾을 수 없습니다.", exception.getMessage());
+        verify(tripPlanRepository, times(1)).findById(999);
+        verify(attractionRepository, never()).findById(anyInt());
+        verify(tripSnippetRepository, never()).save(any(TripSnippet.class));
     }
 }
