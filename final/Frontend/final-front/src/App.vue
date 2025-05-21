@@ -7,7 +7,11 @@
       <router-view v-slot="{ Component }">
         <!-- Vue 3에서 추가된 transition 기능 (선택 사항) -->
         <transition name="fade" mode="out-in">
-          <component :is="Component" />
+          <keep-alive 
+            :include="['AttractionView']"
+          >
+            <component :is="Component" />
+          </keep-alive>
         </transition>
       </router-view>
     </main>

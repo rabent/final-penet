@@ -46,7 +46,7 @@
 <script setup>
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import api from '@/utils/axios'
 
 const router = useRouter()
 
@@ -57,7 +57,7 @@ const loginForm = reactive({
 
 const handleLogin = async () => {
   try {
-    const response = await axios.post('http://localhost:8080/api/auth/login', {
+    const response = await api.post('/auth/login', {
       email: loginForm.email,
       password: loginForm.password
     })
