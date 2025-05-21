@@ -3,6 +3,8 @@ services:
     build:
       context: ./backend
     container_name: spring-backend
+    volumes:
+      - gradle-cache:/root/.gradle  # Gradle 캐시 볼륨
     restart: always
     networks:
       - app-network
@@ -23,6 +25,9 @@ services:
       - backend
     networks:
       - app-network
+
+volumes:
+  gradle-cache:  # 도커 관리 볼륨 정의
 
 networks:
   app-network:
