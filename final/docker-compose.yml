@@ -4,12 +4,10 @@ services:
       context: ./backend
     container_name: spring-backend
     restart: always
-    ports:
-      - "8080:8080"
     networks:
       - app-network
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_PROFILES_ACTIVE=local
       # 필요한 환경변수 추가 (DB 설정 등)
 
   frontend:
@@ -27,9 +25,10 @@ services:
     container_name: nginx-proxy
     restart: always
     ports:
-      - "80:80"
+      - "8080:8080"
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf  # 메인 설정 파일 마운트
+      - ./frontend/final-front/dist:/usr/share/nginx/html  # 프론트엔드 빌드 파일 마운트
       # SSL 인증서가 있는 경우
       # - ./nginx/ssl:/etc/nginx/ssl
     depends_on:
