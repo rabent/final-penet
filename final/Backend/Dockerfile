@@ -7,11 +7,15 @@ COPY gradlew .
 COPY gradle gradle
 COPY build.gradle .
 COPY settings.gradle .
+RUN apt-get update && apt-get install -y dos2unix && dos2unix gradlew
+RUN ./gradlew dependencies --no-daemon
+
 COPY src src
 
 # 권한 설정 및 빌드
+
 RUN chmod +x ./gradlew
-RUN ./gradlew bootJar
+RUN ./gradlew bootJar --no-daemon
 
 # 실행 단계
 FROM openjdk:17-jdk-slim
