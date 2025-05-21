@@ -150,19 +150,80 @@
 
       <!-- 오른쪽 지도 영역 -->
       <div class="map-container">
-        <KakaoMap height="100%" width="100%" :lat="33.450701" :lng="126.570667" />
+        <KakaoMap
+          :lat="mapCenter.lat"
+          :lng="mapCenter.lng"
+          :level="mapCenter.level"
+          :draggable="true"
+          :zoomable="true"
+          @on-load-kakao-map="handleMapLoad"
+          style="width: 100%; height: 100%;"
+        >
+          <KakaoMapMarker 
+            v-for="place in attractions"
+            :order = "place.title"
+            :key="place.no"
+            :lat = Number(place.latitude)
+            :lng = Number(place.longitude)
+            :clickable="true"
+            
+            @on-click-kakao-map-marker="handleMarkerClick(place)"
+          />
+
+            <!-- 선택된 관광지에 대한 오버레이 추가 -->
+          <KakaoMapCustomOverlay
+            v-if="selectedAttractionId && isOverlayVisible"
+            :lat="Number(selectedPlace?.latitude)"
+            :lng="Number(selectedPlace?.longitude)"
+            :y-anchor="1.2"
+          >
+            <template #default>
+              <div class="custom-overlay">
+                <div class="overlay-content">
+                  <div class="overlay-header">
+                    <div class="overlay-title">
+                      <h4>{{ selectedPlace?.title }}</h4>
+                    </div>
+                    <div class="overlay-image" v-if="selectedPlace?.firstImage1 || selectedPlace?.firstImage2">
+                      <img 
+                        :src="selectedPlace?.firstImage1 || selectedPlace?.firstImage2" 
+                        alt="관광지 이미지"
+                      />
+                    </div>
+                  </div>
+                  <p class="overlay-address">
+                    <i class="fas fa-map-marker-alt"></i>
+                    {{ selectedPlace?.addr1 }}
+                  </p>
+                  <div class="overlay-actions">
+                    <button @click="navigateToDetail" class="detail-button">
+                      <i class="fas fa-info-circle"></i>
+                      상세보기
+                    </button>
+                    <button @click="closeOverlay" class="close-button">
+                      <i class="fas fa-times"></i>
+                      닫기
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </KakaoMapCustomOverlay>
         
+        </KakaoMap>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { KakaoMap, KakaoMapMarker } from 'vue3-kakao-maps'
+import { ref, computed, onMounted, nextTick } from 'vue'
+import { KakaoMap, KakaoMapMarker,KakaoMapCustomOverlay } from 'vue3-kakao-maps'
 import api from '@/utils/axios'
+import { useRouter } from 'vue-router'
 
-// 더미 데이터 추가
+const router = useRouter()
+
 const attractions = ref([])
 
 const searchKeyword = ref('')
@@ -184,6 +245,45 @@ const guguns = ref([])
 const selectedGugun = ref(null)
 const showGugunFilter = ref(false)  // 구군 필터 표시 여부
 
+// script setup 부분에 상태 추가
+const mapCenter = ref({
+  lat: 36.2683, // 대한민국 중심 위도
+  lng: 127.6358, // 대한민국 중심 경도
+  level: 4 // 초기 줌 레벨
+})
+
+// map 인스턴스 참조를 위한 ref 추가
+const map = ref(null) 
+
+// 상태 추가
+const isOverlayVisible = ref(false)
+
+// handleMapLoad 함수 수정
+const handleMapLoad = (mapInstance) => {
+  map.value = mapInstance
+}
+
+const selectedPlace = computed(() => 
+  attractions.value.find(place => place.no === selectedAttractionId.value)
+)
+
+// adjustMapBounds 함수 수정
+const adjustMapBounds = () => { 
+  if (!map.value || attractions.value.length === 0) return
+  const bounds = new kakao.maps.LatLngBounds()
+  
+  attractions.value.forEach(place => {
+    bounds.extend(
+      new kakao.maps.LatLng(
+        Number(place.latitude), 
+        Number(place.longitude)
+      )
+    )
+  })
+  
+  map.value.setBounds(bounds)
+}
+
 // 검색 조건으로 관광지 조회 함수 수정
 const searchAttractions = async () => {
   try {
@@ -200,6 +300,13 @@ const searchAttractions = async () => {
     const response = await api.get('/attractions/searchByFilter', { params })
     attractions.value = response.data.content
     totalPages.value = response.data.totalPages
+
+    // 검색 결과가 있을 경우 지도 경계 조정
+    if (response.data.content.length > 0) {
+      nextTick(() => {
+        adjustMapBounds()
+      })
+    }
   } catch (error) {
     console.error('관광지 검색 실패:', error)
   } finally {
@@ -297,9 +404,39 @@ const selectGugun = (gugun) => {
   }
 }
 
-// 관광지 클릭 핸들러
+// 관광지 클릭 핸들러 수정
 const handleAttractionClick = (place) => {
-  selectedAttractionId.value = place.id
+  selectedAttractionId.value = place.no
+  isOverlayVisible.value = true
+  mapCenter.value = {
+    lat: Number(place.latitude),
+    lng: Number(place.longitude),
+  }
+  map.value.setCenter(new kakao.maps.LatLng(Number(place.latitude), Number(place.longitude)))
+  map.value.setLevel(1) // 줌 레벨 조정
+}
+
+// 마커 클릭 핸들러 수정
+const handleMarkerClick = (place) => {
+  selectedAttractionId.value = place.no
+  isOverlayVisible.value = true
+  mapCenter.value = {
+    lat: Number(place.latitude),
+    lng: Number(place.longitude)
+  }
+  map.value.panTo(new kakao.maps.LatLng(Number(place.latitude), Number(place.longitude)))
+}
+
+// 오버레이 닫기 함수 수정
+const closeOverlay = () => {
+  isOverlayVisible.value = false
+}
+
+// 상세 페이지 이동 함수 추가
+const navigateToDetail = () => {
+  if (selectedAttractionId.value) {
+    router.push(`/attractions/${selectedAttractionId.value}`)
+  }
 }
 
 // 텍스트 길이 제한 함수
@@ -802,5 +939,101 @@ onMounted(async () => {
   0% { opacity: 0.6; }
   50% { opacity: 1; }
   100% { opacity: 0.6; }
+}
+
+/* 커스텀 오버레이 스타일 추가/수정 */
+.custom-overlay {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  border: 2px solid #3498db;
+  min-width: 300px;
+  max-width: 400px;
+  overflow: hidden;
+}
+
+.overlay-content {
+  padding: 1rem;
+}
+
+.overlay-header {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.overlay-title {
+  flex: 1;
+}
+
+.overlay-title h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.overlay-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.overlay-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.overlay-address {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.overlay-address i {
+  color: #e74c3c;
+}
+
+.overlay-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.detail-button, .close-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.detail-button {
+  background: #3498db;
+  color: white;
+}
+
+.detail-button:hover {
+  background: #2980b9;
+}
+
+.close-button {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.close-button:hover {
+  background: #e0e0e0;
 }
 </style>
