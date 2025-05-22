@@ -12,6 +12,9 @@ import BoardDetail from '../views/BoardDetailView.vue'
 import BoardEditView from '../views/BoardEditView.vue'
 import Attractions from '../views/AttractionView.vue'
 import AttractionDetailView from '../views/AttractionDetailView.vue'
+import TripPlan from '../views/TripPlanView.vue'
+import TripPlanDetail from '../views/TripPlanDetailView.vue'
+import TripPlanCreate from '../views/TripPlanCreateView.vue'
 
 
 const routes = [
@@ -68,6 +71,33 @@ const routes = [
     path: '/attractions/:id',
     name: 'AttractionDetail',
     component: AttractionDetailView,
+  },
+  {
+    path: '/trip-plan',
+    name: 'TripPlan',
+    component: TripPlan,
+    beforeEnter: requireAuth
+  },
+  {
+    path: '/trip-plan/create',
+    name: 'TripPlanCreate',
+    component: TripPlanCreate,
+    beforeEnter: requireAuth
+  },
+  {
+    path: '/trip-plan/:id',
+    name: 'TripPlanDetail',
+    component: TripPlanDetail,
+    beforeEnter: requireAuth,
+    props: true
+  },
+  {
+    path: '/trip-plan/:id/edit',
+    name: 'TripPlanEdit',
+    // 나중에 수정 페이지를 만들 때 사용
+    component: () => import(/* webpackChunkName: "trip-plan-edit" */ '../views/TripPlanEditView.vue'),
+    beforeEnter: requireAuth,
+    props: true
   }
   // {
   //   path: '/trip-plan',
