@@ -17,13 +17,13 @@ services:
     ports:
       - "8081:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_PROFILES_ACTIVE=prod
       - JAVA_OPTS=-Xms128m -Xmx256m
     deploy:
       resources:
         limits:
-          memory: 300M
-          cpus: '0.3'
+          memory: 600M
+          cpus: '0.5'
     networks:
       - spring-network
 
@@ -34,13 +34,13 @@ services:
     ports:
       - "8082:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_PROFILES_ACTIVE=prod
       - JAVA_OPTS=-Xms128m -Xmx256m
     deploy:
       resources:
         limits:
-          memory: 300M
-          cpus: '0.3'
+          memory: 600M
+          cpus: '0.5'
     networks:
       - spring-network
 
@@ -51,13 +51,13 @@ services:
     ports:
       - "8083:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_PROFILES_ACTIVE=prod
       - JAVA_OPTS=-Xms128m -Xmx256m
     deploy:
       resources:
         limits:
-          memory: 300M
-          cpus: '0.3'
+          memory: 600M
+          cpus: '0.5'
     networks:
       - spring-network
 
@@ -68,13 +68,13 @@ services:
     ports:
       - "8084:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_PROFILES_ACTIVE=prod
       - JAVA_OPTS=-Xms128m -Xmx256m
     deploy:
       resources:
         limits:
-          memory: 300M
-          cpus: '0.3'
+          memory: 600M
+          cpus: '0.5'
     networks:
       - spring-network
 
@@ -85,13 +85,13 @@ services:
     ports:
       - "8085:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_PROFILES_ACTIVE=prod
       - JAVA_OPTS=-Xms128m -Xmx256m
     deploy:
       resources:
         limits:
-          memory: 300M
-          cpus: '0.3'
+          memory: 600M
+          cpus: '0.5'
     networks:
       - spring-network
 
@@ -102,13 +102,13 @@ services:
     ports:
       - "8086:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_PROFILES_ACTIVE=prod
       - JAVA_OPTS=-Xms128m -Xmx256m
     deploy:
       resources:
         limits:
-          memory: 300M
-          cpus: '0.3'
+          memory: 600M
+          cpus: '0.5'
     networks:
       - spring-network
 
@@ -119,13 +119,13 @@ services:
     ports:
       - "8087:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_PROFILES_ACTIVE=prod
       - JAVA_OPTS=-Xms128m -Xmx256m
     deploy:
       resources:
         limits:
-          memory: 300M
-          cpus: '0.3'
+          memory: 600M
+          cpus: '0.5'
     networks:
       - spring-network
 
@@ -136,13 +136,13 @@ services:
     ports:
       - "8088:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_PROFILES_ACTIVE=prod
       - JAVA_OPTS=-Xms128m -Xmx256m
     deploy:
       resources:
         limits:
-          memory: 300M
-          cpus: '0.3'
+          memory: 600M
+          cpus: '0.5'
     networks:
       - spring-network
 
@@ -153,13 +153,13 @@ services:
     ports:
       - "8089:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_PROFILES_ACTIVE=prod
       - JAVA_OPTS=-Xms128m -Xmx256m
     deploy:
       resources:
         limits:
-          memory: 300M
-          cpus: '0.3'
+          memory: 600M
+          cpus: '0.5'
     networks:
       - spring-network
 
