@@ -17,7 +17,7 @@ COPY src src
 RUN chmod +x ./gradlew
 RUN ./gradlew bootJar --no-daemon
 
-# 실행 단계
+
 FROM openjdk:17-jdk-slim
 
 WORKDIR /app
@@ -25,9 +25,21 @@ WORKDIR /app
 # 빌드 단계에서 생성된 jar 파일 복사
 COPY --from=build /app/build/libs/*.jar app.jar
 
+# 메모리 및 GC 최적화
+ENV JAVA_OPTS="-Xms128m -Xmx256m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+
+# 애플리케이션 프로파일은 환경 변수로 지정
 ENV SPRING_PROFILES_ACTIVE=default
-ENV JAVA_OPTS=default
 
-EXPOSE 8080
+ENV SERVER_PORT=8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENV DB_HOST=host.docker.internal
+ENV DB_PORT=3306
+ENV DB_NAME=ssafytrip
+ENV DB_USERNAME=ssafy
+ENV DB_PASSWORD=ssafy
+
+EXPOSE ${SERVER_PORT}
+
+# 시작 명령어
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar --spring.profiles.active=$SPRING_PROFILES_ACTIVE --server.port=$SERVER_PORT"]
