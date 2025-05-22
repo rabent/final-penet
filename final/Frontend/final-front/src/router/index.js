@@ -11,6 +11,8 @@ import BoardWrite from '../views/BoardWriteView.vue'
 import BoardDetail from '../views/BoardDetailView.vue'
 import BoardEditView from '../views/BoardEditView.vue'
 import Attractions from '../views/AttractionView.vue'
+import AttractionDetailView from '../views/AttractionDetailView.vue'
+
 
 const routes = [
   {
@@ -62,11 +64,11 @@ const routes = [
     name: 'Attractions',
     component: Attractions
   },
-  // {
-  //   path: '/board',
-  //   name: 'Board',
-  //   component: () => import(/* webpackChunkName: "board" */ '../views/Board.vue')
-  // },
+  {
+    path: '/attractions/:id',
+    name: 'AttractionDetail',
+    component: AttractionDetailView,
+  }
   // {
   //   path: '/trip-plan',
   //   name: 'TripPlan',
