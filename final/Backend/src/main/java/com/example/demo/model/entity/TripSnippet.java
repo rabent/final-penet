@@ -28,11 +28,17 @@ public class TripSnippet {
     @Column(name = "trip_id")
     private Integer id;
     
-    @Column(name = "price", length = 100, nullable = false)
-    private String price;
+    @Column(name = "price", nullable = false)
+    private Integer price;
 
     @Column(name = "schedule", length = 200, nullable = false)
     private String schedule;
+
+    @Column(name = "date", nullable = false)
+    private String date;
+
+    @Column(name = "category", length = 50, nullable = false)
+    private String category;
 
     @ManyToOne(fetch = FetchType.LAZY) 
     @JoinColumn(name="plan_id")

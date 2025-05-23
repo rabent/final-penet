@@ -16,17 +16,14 @@
 
         <div class="trip-header-content">
           <div class="trip-image">
-            <img :src="tripPlan.imageUrl || '/api/placeholder/800/400'" :alt="tripPlan.title" />
+            <img src="" :alt="tripPlan.planName" />
             <div class="trip-overlay">
-              <div class="trip-status" :class="tripPlan.status">
-                {{ getStatusText(tripPlan.status) }}
-              </div>
             </div>
           </div>
 
           <div class="trip-info">
-            <h1 class="trip-title">{{ tripPlan.title }}</h1>
-            <p class="trip-description">{{ tripPlan.description }}</p>
+            <h1 class="trip-title">{{ tripPlan.planName }}</h1>
+            <p class="trip-description">{{ tripPlan.plan }}</p>
 
             <div class="trip-meta">
               <div class="meta-item">
@@ -41,7 +38,7 @@
                 <span class="icon">📍</span>
                 <div>
                   <strong>주요 위치</strong>
-                  <p>{{ tripPlan.mainLocation }}</p>
+                  <p>{{ tripPlan.location }}</p>
                 </div>
               </div>
 
@@ -57,7 +54,7 @@
                 <span class="icon">📋</span>
                 <div>
                   <strong>총 일정</strong>
-                  <p>{{ tripPlan.items.length }}개</p>
+                  <p>{{ snippets.length }}개</p>
                 </div>
               </div>
             </div>
@@ -69,54 +66,61 @@
       <div class="trip-items-section">
         <div class="section-header">
           <h2>여행 일정</h2>
-          <button @click="editTrip" class="edit-btn">수정하기</button>
+          <button @click="addNewItem" class="add-item-btn">
+            + 일정 추가
+          </button>
         </div>
 
-        <div class="trip-items">
+        <!-- 일정이 없을 때 -->
+        <div v-if="snippets.length === 0" class="empty-items">
+          <div class="empty-content">
+            <div class="empty-icon">📝</div>
+            <h3>아직 여행 일정이 없습니다</h3>
+            <p>첫 번째 여행 일정을 추가하여 멋진 여행을 계획해보세요!</p>
+            <button @click="addNewItem" class="create-first-item-btn">
+              첫 번째 일정 추가하기
+            </button>
+          </div>
+        </div>
+
+        <!-- 일정 목록 -->
+        <div v-else class="trip-items">
           <div
-            v-for="(item, index) in tripPlan.items"
-            :key="item.id"
+            v-for="(snippet, index) in snippets"
+            :key="snippet.id"
             class="trip-item"
           >
             <div class="item-number">{{ index + 1 }}</div>
 
             <div class="item-content">
               <div class="item-header">
-                <h3 class="item-title">{{ item.title }}</h3>
-                <div class="item-meta">
-                  <span class="item-date">{{ formatDateTime(item.scheduledAt) }}</span>
-                  <span class="item-duration" v-if="item.duration">{{ item.duration }}분</span>
+                <h3 class="item-title">{{ snippet.attraction?.name || '관광지 정보 없음' }}</h3>
+                <div class="item-actions">
+                  <button @click="editItem(snippet)" class="edit-item-btn">편집</button>
+                  <button @click="deleteItem(snippet.id)" class="delete-item-btn">삭제</button>
                 </div>
               </div>
 
-              <p class="item-description" v-if="item.description">
-                {{ item.description }}
+              <p class="item-description" v-if="snippet.attraction?.description">
+                {{ snippet.attraction.description }}
               </p>
 
               <div class="item-details">
-                <div class="item-location" v-if="item.location">
+                <div class="item-location" v-if="snippet.attraction?.address">
                   <span class="icon">📍</span>
-                  {{ item.location }}
+                  {{ snippet.attraction.address }}
                 </div>
 
-                <div class="item-cost" v-if="item.cost">
+                <div class="item-cost" v-if="snippet.price">
                   <span class="icon">💰</span>
-                  {{ formatBudget(item.cost) }}
+                  {{ formatBudget(snippet.price) }}
                 </div>
 
-                <div class="item-category">
-                  <span class="category-tag" :class="item.category">
-                    {{ getCategoryText(item.category) }}
+                <div class="item-category" v-if="snippet.attraction?.category">
+                  <span class="category-tag" :class="getCategoryClass(snippet.attraction.category)">
+                    {{ getCategoryText(snippet.attraction.category) }}
                   </span>
                 </div>
-              </div>
-
-              <div class="item-notes" v-if="item.notes">
-                <div class="notes-header">
-                  <span class="icon">📝</span>
-                  <strong>메모</strong>
-                </div>
-                <p>{{ item.notes }}</p>
               </div>
             </div>
           </div>
@@ -128,7 +132,7 @@
         <h2>여행 통계</h2>
         <div class="stats-grid">
           <div class="stat-item">
-            <div class="stat-number">{{ tripPlan.items.length }}</div>
+            <div class="stat-number">{{ snippets.length }}</div>
             <div class="stat-label">총 일정 수</div>
           </div>
 
@@ -168,121 +172,8 @@ const router = useRouter()
 const route = useRoute()
 const loading = ref(true)
 const tripPlan = ref(null)
-
-// 샘플 데이터
-const sampleTripPlan = {
-  id: 1,
-  title: '제주도 힐링 여행',
-  description: '아름다운 제주의 자연과 함께하는 3박 4일 힐링 여행. 스트레스를 해소하고 새로운 에너지를 얻는 시간을 가져보세요.',
-  startDate: '2025-06-15',
-  endDate: '2025-06-18',
-  mainLocation: '제주도',
-  budget: 500000,
-  status: 'planned',
-  imageUrl: 'https://via.placeholder.com/800x400?text=제주도+힐링+여행',
-  createdAt: '2025-05-10',
-  items: [
-    {
-      id: 1,
-      title: '제주공항 도착 및 렌터카 픽업',
-      description: '제주공항에 도착하여 렌터카를 픽업하고 여행 준비를 완료합니다.',
-      scheduledAt: '2025-06-15T10:30:00',
-      duration: 60,
-      location: '제주국제공항',
-      cost: 0,
-      category: 'transport',
-      notes: '렌터카 예약 확인서 지참 필요'
-    },
-    {
-      id: 2,
-      title: '성산일출봉 관람',
-      description: '제주의 대표적인 관광지인 성산일출봉에서 아름다운 경치를 감상합니다.',
-      scheduledAt: '2025-06-15T14:00:00',
-      duration: 120,
-      location: '성산일출봉',
-      cost: 5000,
-      category: 'sightseeing',
-      notes: '편한 신발 착용 권장'
-    },
-    {
-      id: 3,
-      title: '섭지코지 산책',
-      description: '아름다운 해안 절경을 감상하며 여유로운 산책을 즐깁니다.',
-      scheduledAt: '2025-06-15T16:30:00',
-      duration: 90,
-      location: '섭지코지',
-      cost: 0,
-      category: 'sightseeing',
-      notes: '일몰 시간에 맞춰 방문'
-    },
-    {
-      id: 4,
-      title: '흑돼지 구이 저녁식사',
-      description: '제주의 대표 음식인 흑돼지 구이를 맛보며 하루를 마무리합니다.',
-      scheduledAt: '2025-06-15T19:00:00',
-      duration: 90,
-      location: '제주시 구시가지',
-      cost: 35000,
-      category: 'food',
-      notes: '미리 예약 필요'
-    },
-    {
-      id: 5,
-      title: '한라산 등반',
-      description: '제주의 상징인 한라산을 등반하며 자연의 아름다움을 만끽합니다.',
-      scheduledAt: '2025-06-16T07:00:00',
-      duration: 480,
-      location: '한라산 어리목 탐방로',
-      cost: 0,
-      category: 'activity',
-      notes: '등산화, 간식, 충분한 물 준비'
-    },
-    {
-      id: 6,
-      title: '카페 거리 투어',
-      description: '제주의 유명한 카페들을 돌아보며 특별한 커피를 즐깁니다.',
-      scheduledAt: '2025-06-16T15:00:00',
-      duration: 180,
-      location: '애월 카페거리',
-      cost: 15000,
-      category: 'food',
-      notes: '인스타그램 명소 카페 위주'
-    },
-    {
-      id: 7,
-      title: '중문 해수욕장',
-      description: '아름다운 중문 해수욕장에서 수영과 해양 스포츠를 즐깁니다.',
-      scheduledAt: '2025-06-17T10:00:00',
-      duration: 240,
-      location: '중문 해수욕장',
-      cost: 20000,
-      category: 'activity',
-      notes: '수영복, 선크림 준비'
-    },
-    {
-      id: 8,
-      title: '올레시장 쇼핑',
-      description: '제주의 전통 시장에서 기념품과 특산품을 구매합니다.',
-      scheduledAt: '2025-06-17T16:00:00',
-      duration: 120,
-      location: '제주 동문시장',
-      cost: 50000,
-      category: 'shopping',
-      notes: '현금 준비 권장'
-    },
-    {
-      id: 9,
-      title: '공항 이동 및 출발',
-      description: '렌터카 반납 후 제주공항에서 출발합니다.',
-      scheduledAt: '2025-06-18T14:00:00',
-      duration: 120,
-      location: '제주국제공항',
-      cost: 0,
-      category: 'transport',
-      notes: '출발 2시간 전 공항 도착'
-    }
-  ]
-}
+const snippets = ref([])
+const planId = ref(null)
 
 const getTotalDays = computed(() => {
   if (!tripPlan.value) return 0
@@ -293,14 +184,14 @@ const getTotalDays = computed(() => {
 })
 
 const getTotalCost = computed(() => {
-  if (!tripPlan.value) return 0
-  return tripPlan.value.items.reduce((total, item) => total + (item.cost || 0), 0)
+  if (!snippets.value) return 0
+  return snippets.value.reduce((total, snippet) => total + (snippet.price || 0), 0)
 })
 
 const getUniqueLocations = computed(() => {
-  if (!tripPlan.value) return 0
-  const locations = tripPlan.value.items
-    .map(item => item.location)
+  if (!snippets.value) return 0
+  const locations = snippets.value
+    .map(snippet => snippet.attraction?.address)
     .filter(location => location)
   return new Set(locations).size
 })
@@ -308,21 +199,14 @@ const getUniqueLocations = computed(() => {
 const fetchTripPlan = async () => {
   try {
     loading.value = true
-    const planId = route.params.id
+    planId.value = route.params.id
 
     // 실제 API 호출
-    // const response = await api.get(`/trip-plans/${planId}`)
-    // tripPlan.value = response.data
+    const response = await api.get(`/trips/${planId.value}`)
+    tripPlan.value = response.data.plan
+    snippets.value = response.data.snippets
 
-    // 임시로 샘플 데이터 사용
-    setTimeout(() => {
-      if (planId == 1) {
-        tripPlan.value = sampleTripPlan
-      } else {
-        tripPlan.value = null
-      }
-      loading.value = false
-    }, 1000)
+    loading.value = false
   } catch (error) {
     console.error('여행 계획 조회 실패:', error)
     loading.value = false
@@ -338,32 +222,61 @@ const goBack = () => {
   router.push('/trip-plan')
 }
 
-const editTrip = () => {
-  router.push(`/trip-plan/${route.params.id}/edit`)
+const addNewItem = () => {
+  router.push(`/trip-plan/${planId.value}/create`)
 }
 
-const getStatusText = (status) => {
-  const statusMap = {
-    planned: '예정',
-    ongoing: '진행중',
-    completed: '완료'
+const editItem = (snippet) => {
+  router.push(`/trip-plan/${planId.value}/${snippet.id}/edit`)
+}
+
+const deleteItem = async (snippetId) => {
+  if (confirm('정말로 이 일정을 삭제하시겠습니까?')) {
+    try {
+      await api.delete(`/trips/${planId.value}/snippets/${snippetId}`)
+      snippets.value = snippets.value.filter(snippet => snippet.id !== snippetId)
+      alert('일정이 삭제되었습니다.')
+    } catch (error) {
+      console.error('일정 삭제 실패:', error)
+      alert('일정 삭제에 실패했습니다.')
+    }
   }
-  return statusMap[status] || '예정'
+}
+
+const getCategoryClass = (category) => {
+  // 카테고리가 없으면 기본값 반환
+  if (!category) return 'sightseeing'
+
+  const categoryMap = {
+    'TRANSPORT': 'transport',
+    'SIGHTSEEING': 'sightseeing',
+    'FOOD': 'food',
+    'ACTIVITY': 'activity',
+    'SHOPPING': 'shopping',
+    'ACCOMMODATION': 'accommodation'
+  }
+
+  return categoryMap[category.toUpperCase()] || 'sightseeing'
 }
 
 const getCategoryText = (category) => {
+  if (!category) return '기타'
+
   const categoryMap = {
-    transport: '교통',
-    sightseeing: '관광',
-    food: '음식',
-    activity: '액티비티',
-    shopping: '쇼핑',
-    accommodation: '숙박'
+    'TRANSPORT': '교통',
+    'SIGHTSEEING': '관광',
+    'FOOD': '음식',
+    'ACTIVITY': '액티비티',
+    'SHOPPING': '쇼핑',
+    'ACCOMMODATION': '숙박'
   }
-  return categoryMap[category] || '기타'
+
+  return categoryMap[category.toUpperCase()] || '기타'
 }
 
 const formatDateRange = (startDate, endDate) => {
+  if (!startDate || !endDate) return '날짜 정보 없음'
+
   const start = new Date(startDate).toLocaleDateString('ko-KR', {
     year: 'numeric',
     month: 'long',
@@ -377,16 +290,8 @@ const formatDateRange = (startDate, endDate) => {
   return `${start} - ${end}`
 }
 
-const formatDateTime = (dateTime) => {
-  return new Date(dateTime).toLocaleString('ko-KR', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
 const formatBudget = (budget) => {
+  if (!budget) return '0원'
   return new Intl.NumberFormat('ko-KR').format(budget) + '원'
 }
 
@@ -479,26 +384,6 @@ onMounted(() => {
   padding: 20px;
 }
 
-.trip-status {
-  padding: 8px 16px;
-  border-radius: 25px;
-  font-size: 14px;
-  font-weight: 600;
-  color: white;
-}
-
-.trip-status.planned {
-  background-color: #3498db;
-}
-
-.trip-status.ongoing {
-  background-color: #f39c12;
-}
-
-.trip-status.completed {
-  background-color: #27ae60;
-}
-
 .trip-info {
   padding: 40px;
 }
@@ -563,8 +448,8 @@ onMounted(() => {
   font-weight: 600;
 }
 
-.edit-btn {
-  background-color: #3498db;
+.add-item-btn {
+  background-color: #27ae60;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -575,7 +460,55 @@ onMounted(() => {
   transition: background-color 0.2s;
 }
 
-.edit-btn:hover {
+.add-item-btn:hover {
+  background-color: #219a52;
+}
+
+.empty-items {
+  text-align: center;
+  padding: 60px 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 16px;
+  margin-bottom: 30px;
+}
+
+.empty-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.empty-content h3 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.empty-content p {
+  color: #666;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.create-first-item-btn {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.create-first-item-btn:hover {
   background-color: #2980b9;
 }
 
@@ -625,27 +558,42 @@ onMounted(() => {
   font-weight: 600;
   color: #333;
   margin: 0;
+  flex: 1;
 }
 
-.item-meta {
+.item-actions {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
+  align-items: center;
+  gap: 8px;
 }
 
-.item-date {
-  font-size: 14px;
-  color: #666;
-  font-weight: 500;
-}
-
-.item-duration {
+.edit-item-btn,
+.delete-item-btn {
   font-size: 12px;
-  color: #888;
-  background-color: #f8f9fa;
-  padding: 2px 8px;
-  border-radius: 12px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.edit-item-btn {
+  background-color: #3498db;
+  color: white;
+}
+
+.edit-item-btn:hover {
+  background-color: #2980b9;
+}
+
+.delete-item-btn {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.delete-item-btn:hover {
+  background-color: #c0392b;
 }
 
 .item-description {
@@ -705,36 +653,6 @@ onMounted(() => {
 
 .category-tag.accommodation {
   background-color: #34495e;
-}
-
-.item-notes {
-  background-color: #f8f9fa;
-  padding: 16px;
-  border-radius: 8px;
-  border-left: 3px solid #3498db;
-}
-
-.notes-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.notes-header .icon {
-  font-size: 14px;
-}
-
-.notes-header strong {
-  color: #333;
-  font-size: 14px;
-}
-
-.item-notes p {
-  margin: 0;
-  color: #666;
-  font-size: 14px;
-  line-height: 1.5;
 }
 
 .trip-statistics {
@@ -799,8 +717,16 @@ onMounted(() => {
     gap: 8px;
   }
 
-  .item-meta {
+  .item-actions {
     align-items: flex-start;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .edit-item-btn,
+  .delete-item-btn {
+    font-size: 11px;
+    padding: 3px 6px;
   }
 
   .stats-grid {

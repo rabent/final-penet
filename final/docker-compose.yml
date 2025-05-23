@@ -9,7 +9,7 @@ services:
     networks:
       - app-network
     environment:
-      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_PROFILES_ACTIVE=prod
       # 필요한 환경변수 추가 (DB 설정 등)
 
   frontend:
