@@ -1,4 +1,4 @@
-<!-- views/TripPlanDetailView.vue -->
+  <!-- views/TripPlanDetailView.vue -->
 <template>
   <div class="trip-detail-container">
     <!-- 로딩 상태 -->
@@ -18,6 +18,9 @@
           <div class="trip-image">
             <img src="" :alt="tripPlan.planName" />
             <div class="trip-overlay">
+            <button @click="editPlan" class="edit-plan-btn">
+                    ✏️ 여행 계획 편집
+                  </button>
             </div>
           </div>
 
@@ -216,6 +219,10 @@ const fetchTripPlan = async () => {
       router.push('/login')
     }
   }
+}
+
+const editPlan = () => {
+  router.push(`/trip-plan/${planId.value}/edit`)
 }
 
 const goBack = () => {
@@ -733,5 +740,40 @@ onMounted(() => {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
+}
+
+.trip-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.3));
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 20px;
+}
+
+.edit-plan-btn {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.edit-plan-btn:hover {
+  background-color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 </style>
