@@ -15,7 +15,7 @@ import AttractionDetailView from '../views/AttractionDetailView.vue'
 import TripPlan from '../views/TripPlanView.vue'
 import TripPlanDetail from '../views/TripPlanDetailView.vue'
 import TripPlanCreate from '../views/TripPlanCreateView.vue'
-
+import TripScheduleCreate from '../views/TripScheduleCreateView.vue'
 
 const routes = [
   {
@@ -76,29 +76,42 @@ const routes = [
     path: '/trip-plan',
     name: 'TripPlan',
     component: TripPlan,
-    beforeEnter: requireAuth
+    meta: { requiresAuth: true }
   },
   {
     path: '/trip-plan/create',
     name: 'TripPlanCreate',
     component: TripPlanCreate,
-    beforeEnter: requireAuth
+    meta: { requiresAuth: true }
   },
   {
     path: '/trip-plan/:id',
     name: 'TripPlanDetail',
     component: TripPlanDetail,
-    beforeEnter: requireAuth,
+    meta: { requiresAuth: true },
     props: true
   },
+  // router/index.js에 추가
+  //{
+   // path: '/trip-plan/:planId/:scheduleId/edit',
+   // name: 'TripScheduleEdit',
+   // component: () => import('../views/TripScheduleEditView.vue'),
+   // meta: { requiresAuth: true }
+  //},
   {
-    path: '/trip-plan/:id/edit',
-    name: 'TripPlanEdit',
-    // 나중에 수정 페이지를 만들 때 사용
-    component: () => import(/* webpackChunkName: "trip-plan-edit" */ '../views/TripPlanEditView.vue'),
-    beforeEnter: requireAuth,
-    props: true
+    path: '/trip-plan/:planId/create',
+    name: 'TripScheduleCreate',
+    component: TripScheduleCreate,
+    meta: { requiresAuth: true }
   }
+  //{
+    //path: '/trip-plan/:id/edit',
+    //name: 'TripPlanEdit',
+    // 나중에 수정 페이지를 만들 때 사용
+    //component: () => import(/* webpackChunkName: "trip-plan-edit" */ '../views/TripPlanEditView.vue'),
+    //meta: { requiresAuth: true },
+    //props: true
+  //}
   // {
   //   path: '/trip-plan',
   //   name: 'TripPlan',

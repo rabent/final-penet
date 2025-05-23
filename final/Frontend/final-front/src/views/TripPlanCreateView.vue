@@ -74,145 +74,15 @@
             />
           </div>
 
-          <div class="form-group">
-            <label for="budget">예산</label>
-            <input
-              type="number"
-              id="budget"
-              v-model="tripForm.budget"
-              min="0"
-              step="1000"
-              placeholder="원"
-            />
-          </div>
         </div>
       </div>
 
-      <!-- 여행 일정 섹션 -->
-      <div class="form-section">
-        <div class="section-header">
-          <h2>여행 일정</h2>
-          <button type="button" @click="addTripItem" class="add-item-btn">
-            + 일정 추가
-          </button>
-        </div>
-
-        <div v-if="tripForm.items.length === 0" class="empty-items">
-          <p>아직 일정이 없습니다. 첫 번째 일정을 추가해보세요!</p>
-        </div>
-
-        <div v-else class="trip-items">
-          <div
-            v-for="(item, index) in tripForm.items"
-            :key="item.tempId"
-            class="trip-item-form"
-          >
-            <div class="item-header">
-              <span class="item-number">{{ index + 1 }}</span>
-              <button
-                type="button"
-                @click="removeTripItem(index)"
-                class="remove-item-btn"
-                :disabled="tripForm.items.length === 1"
-              >
-                삭제
-              </button>
-            </div>
-
-            <div class="item-form-content">
-              <div class="form-row">
-                <div class="form-group flex-2">
-                  <label>일정 제목 *</label>
-                  <input
-                    type="text"
-                    v-model="item.title"
-                    required
-                    maxlength="100"
-                    placeholder="예: 성산일출봉 관람"
-                  />
-                </div>
-
-                <div class="form-group">
-                  <label>카테고리</label>
-                  <select v-model="item.category">
-                    <option value="sightseeing">관광</option>
-                    <option value="food">음식</option>
-                    <option value="activity">액티비티</option>
-                    <option value="transport">교통</option>
-                    <option value="shopping">쇼핑</option>
-                    <option value="accommodation">숙박</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label>설명</label>
-                <textarea
-                  v-model="item.description"
-                  maxlength="300"
-                  rows="2"
-                  placeholder="이 일정에 대한 간단한 설명"
-                ></textarea>
-              </div>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label>일시 *</label>
-                  <input
-                    type="datetime-local"
-                    v-model="item.scheduledAt"
-                    required
-                    :min="getMinDateTime(tripForm.startDate)"
-                    :max="getMaxDateTime(tripForm.endDate)"
-                  />
-                </div>
-
-                <div class="form-group">
-                  <label>소요시간 (분)</label>
-                  <input
-                    type="number"
-                    v-model="item.duration"
-                    min="1"
-                    max="1440"
-                    placeholder="60"
-                  />
-                </div>
-              </div>
-
-              <div class="form-row">
-                <div class="form-group flex-2">
-                  <label>위치</label>
-                  <input
-                    type="text"
-                    v-model="item.location"
-                    maxlength="100"
-                    placeholder="예: 제주시 성산읍"
-                  />
-                </div>
-
-                <div class="form-group">
-                  <label>비용</label>
-                  <input
-                    type="number"
-                    v-model="item.cost"
-                    min="0"
-                    step="1000"
-                    placeholder="원"
-                  />
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label>메모</label>
-                <textarea
-                  v-model="item.notes"
-                  maxlength="200"
-                  rows="2"
-                  placeholder="개인적인 메모나 주의사항"
-                ></textarea>
-              </div>
-            </div>
-          </div>
+      <!-- 안내 메시지 -->
+      <div class="info-section">
+        <div class="info-content">
+          <h3>📝 여행 계획 생성 안내</h3>
+          <p>기본 정보를 입력하여 여행 계획을 먼저 생성하세요.</p>
+          <p>생성 후 상세 페이지에서 구체적인 여행 일정을 추가할 수 있습니다.</p>
         </div>
       </div>
 
@@ -222,7 +92,7 @@
           취소
         </button>
         <button type="submit" class="submit-btn" :disabled="!isFormValid || isSubmitting">
-          {{ isSubmitting ? '생성 중...' : '여행 계획 생성' }}
+          {{ isSubmitting ? '생성 중...' : '여행 계획 생성하기' }}
         </button>
       </div>
     </form>
@@ -244,9 +114,7 @@ const tripForm = reactive({
   description: '',
   startDate: '',
   endDate: '',
-  mainLocation: '',
-  budget: null,
-  items: []
+  mainLocation: ''
 })
 
 const isFormValid = computed(() => {
@@ -254,48 +122,10 @@ const isFormValid = computed(() => {
          tripForm.startDate &&
          tripForm.endDate &&
          tripForm.mainLocation &&
-         tripForm.startDate <= tripForm.endDate &&
-         tripForm.items.length > 0 &&
-         tripForm.items.every(item =>
-           item.title &&
-           item.scheduledAt &&
-           item.category
-         )
+         tripForm.startDate <= tripForm.endDate
 })
 
 let itemIdCounter = 1
-
-const createNewItem = () => ({
-  tempId: itemIdCounter++,
-  title: '',
-  description: '',
-  scheduledAt: '',
-  duration: null,
-  location: '',
-  cost: null,
-  category: 'sightseeing',
-  notes: ''
-})
-
-const addTripItem = () => {
-  tripForm.items.push(createNewItem())
-}
-
-const removeTripItem = (index) => {
-  if (tripForm.items.length > 1) {
-    tripForm.items.splice(index, 1)
-  }
-}
-
-const getMinDateTime = (date) => {
-  if (!date) return ''
-  return `${date}T00:00`
-}
-
-const getMaxDateTime = (date) => {
-  if (!date) return ''
-  return `${date}T23:59`
-}
 
 const handleSubmit = async () => {
   try {
@@ -303,31 +133,20 @@ const handleSubmit = async () => {
 
     // 폼 데이터 정리
     const formData = {
-      title: tripForm.title,
-      description: tripForm.description,
+      planName: tripForm.title,
+      plan: tripForm.description,
       startDate: tripForm.startDate,
       endDate: tripForm.endDate,
-      mainLocation: tripForm.mainLocation,
-      budget: tripForm.budget || 0,
-      items: tripForm.items.map(item => ({
-        title: item.title,
-        description: item.description,
-        scheduledAt: item.scheduledAt,
-        duration: item.duration || null,
-        location: item.location,
-        cost: item.cost || 0,
-        category: item.category,
-        notes: item.notes
-      }))
+      location: tripForm.mainLocation,
+      items: [] // 빈 배열로 시작
     }
 
     // API 호출
-    // const response = await api.post('/trip-plans', formData)
+    const response = await api.post('/trips', formData)
 
-    // 임시로 성공 처리
     setTimeout(() => {
       alert('여행 계획이 성공적으로 생성되었습니다!')
-      router.push('/trip-plan')
+      router.push(`/trip-plan`)
     }, 1500)
 
   } catch (error) {
@@ -344,7 +163,7 @@ const handleSubmit = async () => {
 }
 
 const goBack = () => {
-  if (tripForm.title || tripForm.items.length > 0) {
+  if (tripForm.title || tripForm.description) {
     if (confirm('작성 중인 내용이 있습니다. 정말로 나가시겠습니까?')) {
       router.push('/trip-plan')
     }
@@ -352,9 +171,6 @@ const goBack = () => {
     router.push('/trip-plan')
   }
 }
-
-// 첫 번째 일정 항목 추가
-addTripItem()
 </script>
 
 <style scoped>
@@ -435,20 +251,29 @@ addTripItem()
   padding-bottom: 0;
 }
 
-.add-item-btn {
-  background-color: #27ae60;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: background-color 0.2s;
+.info-section {
+  margin-bottom: 40px;
 }
 
-.add-item-btn:hover {
-  background-color: #219a52;
+.info-content {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 24px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.info-content h3 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.info-content p {
+  margin: 8px 0;
+  opacity: 0.9;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .form-group {
