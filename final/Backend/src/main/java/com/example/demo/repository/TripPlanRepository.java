@@ -15,7 +15,7 @@ import com.example.demo.model.entity.User;
 
 @Repository
 public interface TripPlanRepository extends JpaRepository<TripPlan, Integer> {
-    @Query("SELECT new com.example.demo.model.dto.TripPlan.TripPlanSummaryDto(t.id, t.planName, t.plan) FROM TripPlan t "
+    @Query("SELECT new com.example.demo.model.dto.TripPlan.TripPlanSummaryDto(t.id, t.planName, t.plan, t.startDate, t.endDate, t.location, t.budget) FROM TripPlan t "
     + "where t.user=:user")
     Page<TripPlanSummaryDto> findAllByUser(@Param("user") User user, Pageable pageable);
     

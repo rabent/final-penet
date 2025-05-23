@@ -32,9 +32,6 @@
       >
         <div class="plan-image">
           <img :src="plan.imageUrl || '/api/placeholder/300/200'" :alt="plan.title" />
-          <div class="plan-status" :class="plan.status">
-            {{ getStatusText(plan.status) }}
-          </div>
         </div>
         <div class="plan-content">
           <h3 class="plan-title">{{ plan.title }}</h3>
@@ -46,15 +43,10 @@
             </div>
             <div class="plan-location">
               <span class="icon">📍</span>
-              {{ plan.mainLocation }}
-            </div>
-            <div class="plan-items">
-              <span class="icon">📋</span>
-              {{ plan.itemCount }}개 일정
+              {{ plan.location }}
             </div>
           </div>
           <div class="plan-meta">
-            <span class="created-date">{{ formatDate(plan.createdAt) }} 생성</span>
             <span class="plan-budget" v-if="plan.budget">
               예산: {{ formatBudget(plan.budget) }}
             </span>
@@ -119,11 +111,11 @@ const sampleTripPlans = [
     startDate: '2025-06-15',
     endDate: '2025-06-18',
     mainLocation: '제주도',
-    itemCount: 12,
+    itemCount: 0, // 일정 추가 전이므로 0개
     budget: 500000,
     status: 'planned',
     imageUrl: 'https://via.placeholder.com/300x200?text=제주도',
-    createdAt: '2025-05-10'
+    createdAt: '2025-05-23' // 오늘 생성된 것으로 변경
   },
   {
     id: 2,
@@ -191,14 +183,15 @@ const fetchTripPlans = async () => {
   try {
     loading.value = true
     // 실제 API 호출
-    // const response = await api.get('/trip-plans')
-    // tripPlans.value = response.data
-
-    // 임시로 샘플 데이터 사용
-    setTimeout(() => {
-      tripPlans.value = sampleTripPlans
-      loading.value = false
-    }, 1000)
+    const response =  await api.get('/trips', {
+                           params: {
+                             page: currentPage.value - 1, // Spring은 0부터 시작
+                             size: itemsPerPage
+                           }
+                         })
+    tripPlans.value = response.data.content
+    totalPages.value = response.data.totalPages
+    loading.value = false
   } catch (error) {
     console.error('여행 계획 조회 실패:', error)
     loading.value = false

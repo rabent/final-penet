@@ -27,6 +27,7 @@ COPY --from=build /app/build/libs/*.jar app.jar
 
 ENV SPRING_PROFILES_ACTIVE=default
 ENV JAVA_OPTS=default
+ENV DB_HOST=host.docker.internal
 
 EXPOSE 8080
 
