@@ -88,7 +88,7 @@
                 <span class="distance" v-if="attraction.dist">{{ Math.round(attraction.dist) }}m</span>
               </div>
             </div>
-            <div v-if="selectedAttraction?.contentid === attraction.contentid || selectedAttraction?.no === attraction.no" class="selected-badge">
+            <div v-if="selectedAttraction?.no === attraction.no" class="selected-badge">
               ✓ 선택됨
             </div>
           </div>
