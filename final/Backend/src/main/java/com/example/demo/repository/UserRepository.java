@@ -21,4 +21,13 @@ public interface UserRepository extends JpaRepository<User, Integer> {//별도�
     
     // 특정 역할을 가진 모든 사용자 찾기
     List<User> findAllByRole(String role);
+
+    // 이메일 존재여부 체크
+    boolean existsByEmail(String email);
+
+    // 아이디 찾기: 이름과 전화번호로 사용자 찾기
+    Optional<User> findByNameAndNumber(String name, String number);
+
+    // 비밀번호 찾기: 이메일과 이름으로 사용자 찾기
+    Optional<User> findByEmailAndName(String email, String name);
 }

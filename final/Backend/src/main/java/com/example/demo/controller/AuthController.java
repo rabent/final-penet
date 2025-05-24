@@ -1,5 +1,7 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.dto.User.FindIdRequestDto;
+import com.example.demo.model.dto.User.FindPasswordRequestDto;
 import com.example.demo.model.dto.User.LoginRequestDto;
 import com.example.demo.model.dto.User.UserResponseDto;
 import com.example.demo.security.JwtProvider;
@@ -16,11 +18,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.Map;
 
 @RestController
@@ -72,6 +72,25 @@ public class AuthController {
                 "Authorization", "Bearer " + token,
                 "userId", user.getId()
         ));
+    }
+
+    @GetMapping("/check-email")
+    public ResponseEntity<Map<String, Boolean>> checkEmail(
+            @RequestParam String email) {
+        boolean isDuplicate = userService.isEmailDuplicate(email);
+        return ResponseEntity.ok(Collections.singletonMap("isDuplicate", isDuplicate));
+    }
+
+    @PostMapping("/find-id")
+    public ResponseEntity<UserResponseDto> findId(@RequestBody FindIdRequestDto request) {
+        UserResponseDto userEmail = userService.findUserEmail(request.getName(), request.getNumber());
+        return ResponseEntity.ok(userEmail);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, String>> resetPassword(@RequestBody FindPasswordRequestDto request) {
+        String tempPassword = userService.resetPassword(request);
+        return ResponseEntity.ok(Collections.singletonMap("tempPassword", tempPassword));
     }
 }
 
