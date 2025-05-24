@@ -131,6 +131,7 @@ public class TripPlanService {
         TripPlan plan=snippet.getPlan();
         if(plan!=null) {
             plan.getSnippets().remove(snippet);
+            plan.setBudget(plan.getBudget()-snippet.getPrice());
         }
         snippet.setPlan(null);
         tripSnippetRepository.deleteById(snippetId);
@@ -161,7 +162,11 @@ public class TripPlanService {
         if (planOptional.isPresent()) {
             TripPlanResponseDto plan = TripPlanResponseDto.from(planOptional.get());
             List<TPsnippetSummaryDto> snippets = tripSnippetRepository.getTripSnippetSummaryById(planOptional.get());
-
+            for(TPsnippetSummaryDto snippet : snippets) {
+                Attraction attraction=attractionRepository.findById(snippet.getNo()).orElseThrow(()->new EntityNotFoundException("관광지를 조회할 수 없습니다."));
+                AttractionSummaryDto attractionSummaryDto=AttractionSummaryDto.from(attraction);
+                snippet.setAttraction(attractionSummaryDto);
+            }
             return new TripPlanWithSnippetsDto(plan, snippets);
         }
         else {

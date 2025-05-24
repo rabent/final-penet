@@ -17,5 +17,7 @@ public class TPsnippetSummaryDto {
 
     private Integer price;
 
+    private Integer no;
+
     private AttractionSummaryDto attraction;
 }
