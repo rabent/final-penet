@@ -28,12 +28,29 @@
         v-for="plan in paginatedPlans"
         :key="plan.id"
         class="trip-plan-card"
-        @click="goToDetail(plan.id)"
       >
-        <div class="plan-image">
-          <img :src="plan.imageUrl || '/api/placeholder/300/200'" :alt="plan.title" />
+        <!-- 카드 액션 버튼들 -->
+        <div class="card-actions">
+          <button
+            @click.stop="goToDetail(plan.id)"
+            class="action-btn view-btn"
+            title="상세보기"
+          >
+            👁️
+          </button>
+          <button
+            @click.stop="showDeleteConfirm(plan)"
+            class="action-btn delete-btn"
+            title="삭제"
+          >
+            🗑️
+          </button>
         </div>
-        <div class="plan-content">
+
+        <div class="plan-image" @click="goToDetail(plan.id)">
+          <img :src="getLocationImage(plan)" loading="lazy" :alt="plan.title" />
+        </div>
+        <div class="plan-content" @click="goToDetail(plan.id)">
           <h3 class="plan-title">{{ plan.title }}</h3>
           <p class="plan-description">{{ plan.description }}</p>
           <div class="plan-info">
@@ -88,6 +105,29 @@
       <span class="plus-icon">+</span>
       여행 계획 생성
     </button>
+
+    <!-- 삭제 확인 모달 -->
+    <div v-if="showDeleteModal" class="modal-overlay" @click="hideDeleteConfirm">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>여행 계획 삭제</h3>
+        </div>
+        <div class="modal-body">
+          <p><strong>{{ planToDelete?.title }}</strong> 여행 계획을 정말 삭제하시겠습니까?</p>
+          <p class="warning-text">삭제된 여행 계획은 복구할 수 없습니다.</p>
+        </div>
+        <div class="modal-footer">
+          <button @click="hideDeleteConfirm" class="cancel-btn">취소</button>
+          <button
+            @click="confirmDelete"
+            class="confirm-delete-btn"
+            :disabled="deleting"
+          >
+            {{ deleting ? '삭제 중...' : '삭제' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -102,61 +142,10 @@ const tripPlans = ref([])
 const currentPage = ref(1)
 const itemsPerPage = 6
 
-// 샘플 데이터 (실제로는 API에서 가져옴)
-const sampleTripPlans = [
-  {
-    id: 1,
-    title: '제주도 힐링 여행',
-    description: '아름다운 제주의 자연과 함께하는 3박 4일 힐링 여행',
-    startDate: '2025-06-15',
-    endDate: '2025-06-18',
-    mainLocation: '제주도',
-    itemCount: 0, // 일정 추가 전이므로 0개
-    budget: 500000,
-    status: 'planned',
-    imageUrl: 'https://via.placeholder.com/300x200?text=제주도',
-    createdAt: '2025-05-23' // 오늘 생성된 것으로 변경
-  },
-  {
-    id: 2,
-    title: '부산 바다 여행',
-    description: '시원한 바다와 맛있는 음식이 있는 부산 2박 3일 여행',
-    startDate: '2025-07-20',
-    endDate: '2025-07-22',
-    mainLocation: '부산',
-    itemCount: 8,
-    budget: 300000,
-    status: 'ongoing',
-    imageUrl: 'https://via.placeholder.com/300x200?text=부산',
-    createdAt: '2025-05-08'
-  },
-  {
-    id: 3,
-    title: '서울 문화탐방',
-    description: '역사와 현대가 공존하는 서울의 매력을 느끼는 여행',
-    startDate: '2025-08-10',
-    endDate: '2025-08-12',
-    mainLocation: '서울',
-    itemCount: 15,
-    budget: 400000,
-    status: 'completed',
-    imageUrl: 'https://via.placeholder.com/300x200?text=서울',
-    createdAt: '2025-05-05'
-  },
-  {
-    id: 4,
-    title: '경주 역사여행',
-    description: '천년 고도 경주의 역사를 만나는 특별한 여행',
-    startDate: '2025-09-05',
-    endDate: '2025-09-07',
-    mainLocation: '경주',
-    itemCount: 10,
-    budget: 250000,
-    status: 'planned',
-    imageUrl: 'https://via.placeholder.com/300x200?text=경주',
-    createdAt: '2025-05-01'
-  }
-]
+// 삭제 관련 상태
+const showDeleteModal = ref(false)
+const planToDelete = ref(null)
+const deleting = ref(false)
 
 const paginatedPlans = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
@@ -182,13 +171,12 @@ const visiblePages = computed(() => {
 const fetchTripPlans = async () => {
   try {
     loading.value = true
-    // 실제 API 호출
-    const response =  await api.get('/trips', {
-                           params: {
-                             page: currentPage.value - 1, // Spring은 0부터 시작
-                             size: itemsPerPage
-                           }
-                         })
+    const response = await api.get('/trips', {
+      params: {
+        page: currentPage.value - 1,
+        size: itemsPerPage
+      }
+    })
     tripPlans.value = response.data.content
     totalPages.value = response.data.totalPages
     loading.value = false
@@ -200,6 +188,108 @@ const fetchTripPlans = async () => {
       router.push('/login')
     }
   }
+}
+
+// 삭제 관련 함수들
+const showDeleteConfirm = (plan) => {
+  planToDelete.value = plan
+  showDeleteModal.value = true
+}
+
+const hideDeleteConfirm = () => {
+  showDeleteModal.value = false
+  planToDelete.value = null
+  deleting.value = false
+}
+
+const confirmDelete = async () => {
+  if (!planToDelete.value) return
+
+  try {
+    deleting.value = true
+    await api.delete(`/trips/${planToDelete.value.id}`)
+
+    tripPlans.value = tripPlans.value.filter(plan => plan.id !== planToDelete.value.id)
+
+    if (paginatedPlans.value.length === 0 && currentPage.value > 1) {
+      currentPage.value = currentPage.value - 1
+    }
+
+    hideDeleteConfirm()
+    alert('여행 계획이 성공적으로 삭제되었습니다.')
+
+  } catch (error) {
+    console.error('여행 계획 삭제 실패:', error)
+    deleting.value = false
+
+    if (error.response?.status === 401) {
+      alert('로그인이 필요합니다.')
+      router.push('/login')
+    } else if (error.response?.status === 403) {
+      alert('해당 여행 계획을 삭제할 권한이 없습니다.')
+    } else if (error.response?.status === 404) {
+      alert('삭제하려는 여행 계획을 찾을 수 없습니다.')
+    } else {
+      alert('여행 계획 삭제에 실패했습니다. 다시 시도해주세요.')
+    }
+
+    hideDeleteConfirm()
+  }
+}
+
+// 지역별 이미지 매핑 함수 (수정된 버전)
+const getLocationImage = (plan) => {
+  if (plan.imageUrl && !plan.imageUrl.includes('placeholder')) {
+    return plan.imageUrl
+  }
+
+  const locationImages = {
+    '서울': 'https://picsum.photos/seed/seoul/400/250',
+    '인천': 'https://picsum.photos/seed/incheon/400/250',
+    '대전': 'https://picsum.photos/seed/daejeon/400/250',
+    '대구': 'https://picsum.photos/seed/daegu/400/250',
+    '광주': 'https://picsum.photos/seed/gwangju/400/250',
+    '부산': 'https://picsum.photos/seed/busan/400/250',
+    '울산': 'https://picsum.photos/seed/ulsan/400/250',
+    '세종특별자치시': 'https://picsum.photos/seed/sejong/400/250',
+    '세종': 'https://picsum.photos/seed/sejong/400/250',
+    '경기도': 'https://picsum.photos/seed/gyeonggi/400/250',
+    '경기': 'https://picsum.photos/seed/gyeonggi/400/250',
+    '강원특별자치도': 'https://picsum.photos/seed/gangwon/400/250',
+    '강원도': 'https://picsum.photos/seed/gangwon/400/250',
+    '강원': 'https://picsum.photos/seed/gangwon/400/250',
+    '충청북도': 'https://picsum.photos/seed/chungbuk/400/250',
+    '충북': 'https://picsum.photos/seed/chungbuk/400/250',
+    '충청남도': 'https://picsum.photos/seed/chungnam/400/250',
+    '충남': 'https://picsum.photos/seed/chungnam/400/250',
+    '경상북도': 'https://picsum.photos/seed/gyeongbuk/400/250',
+    '경북': 'https://picsum.photos/seed/gyeongbuk/400/250',
+    '경상남도': 'https://picsum.photos/seed/gyeongnam/400/250',
+    '경남': 'https://picsum.photos/seed/gyeongnam/400/250',
+    '전북특별자치도': 'https://picsum.photos/seed/jeonbuk/400/250',
+    '전라북도': 'https://picsum.photos/seed/jeonbuk/400/250',
+    '전북': 'https://picsum.photos/seed/jeonbuk/400/250',
+    '전라남도': 'https://picsum.photos/seed/jeonnam/400/250',
+    '전남': 'https://picsum.photos/seed/jeonnam/400/250',
+    '제주도': 'https://picsum.photos/seed/jeju/400/250',
+    '제주': 'https://picsum.photos/seed/jeju/400/250'
+  }
+
+  const location = (plan.location || '').trim()
+
+  if (locationImages[location]) {
+    return locationImages[location]
+  }
+
+  const matchedLocation = Object.keys(locationImages).find(key => {
+    return location.includes(key) || key.includes(location)
+  })
+
+  if (matchedLocation) {
+    return locationImages[matchedLocation]
+  }
+
+  return 'https://picsum.photos/seed/travel/400/250'
 }
 
 const changePage = (page) => {
@@ -327,11 +417,57 @@ onMounted(() => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition: transform 0.3s, box-shadow 0.3s;
+  position: relative;
 }
 
 .trip-plan-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* 카드 액션 버튼 스타일 */
+.card-actions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.view-btn {
+  background-color: rgba(52, 152, 219, 0.9);
+  color: white;
+}
+
+.view-btn:hover {
+  background-color: rgba(52, 152, 219, 1);
+  transform: scale(1.1);
+}
+
+.delete-btn {
+  background-color: rgba(231, 76, 60, 0.9);
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: rgba(231, 76, 60, 1);
+  transform: scale(1.1);
 }
 
 .plan-image {
@@ -349,7 +485,7 @@ onMounted(() => {
 .plan-status {
   position: absolute;
   top: 12px;
-  right: 12px;
+  left: 12px;
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 12px;
@@ -488,6 +624,101 @@ onMounted(() => {
   font-weight: bold;
 }
 
+/* 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  padding: 24px 24px 0 24px;
+}
+
+.modal-header h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.modal-body {
+  padding: 20px 24px;
+}
+
+.modal-body p {
+  margin: 0 0 12px 0;
+  color: #555;
+  line-height: 1.5;
+}
+
+.warning-text {
+  color: #e74c3c;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.modal-footer {
+  padding: 0 24px 24px 24px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.cancel-btn {
+  padding: 10px 20px;
+  border: 1px solid #ddd;
+  background: white;
+  color: #666;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.cancel-btn:hover {
+  background-color: #f8f9fa;
+  border-color: #999;
+}
+
+.confirm-delete-btn {
+  padding: 10px 20px;
+  border: none;
+  background-color: #e74c3c;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.confirm-delete-btn:hover:not(:disabled) {
+  background-color: #c0392b;
+}
+
+.confirm-delete-btn:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   .trip-plans-grid {
     grid-template-columns: 1fr;
@@ -503,6 +734,21 @@ onMounted(() => {
     right: 20px;
     padding: 14px 20px;
     font-size: 14px;
+  }
+
+  .card-actions {
+    top: 8px;
+    right: 8px;
+  }
+
+  .action-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .modal-content {
+    margin: 20px;
   }
 }
 </style>

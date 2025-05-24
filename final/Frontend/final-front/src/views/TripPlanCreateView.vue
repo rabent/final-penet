@@ -64,14 +64,12 @@
         <div class="form-row">
           <div class="form-group">
             <label for="mainLocation">주요 위치 *</label>
-            <input
-              type="text"
-              id="mainLocation"
-              v-model="tripForm.mainLocation"
-              required
-              maxlength="50"
-              placeholder="예: 제주도, 부산, 서울"
-            />
+            <select v-model="tripForm.mainLocation" class="filter-select">
+              <option value="">시/도 선택</option>
+              <option v-for="sido in sidoList" :key="sido.code" :value="sido.name">
+                {{ sido.name }}
+              </option>
+            </select>
           </div>
 
         </div>
@@ -100,14 +98,54 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted} from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/utils/axios'
 
 const router = useRouter()
 const isSubmitting = ref(false)
-
+const sidoLoading = ref(false)
+const sidoError = ref(false)
 const today = new Date().toISOString().split('T')[0]
+const sidoList = ref([])
+
+const fetchSidos = async () => {
+  try {
+    sidoLoading.value = true
+    sidoError.value = false
+
+    const response = await api.get('/attractions/sidos')
+
+    // API 응답 데이터 구조를 변환하여 sidoList에 저장
+    sidoList.value = [
+      { code: '0', name: '전국' },
+      ...response.data.map(sido => ({
+        code: sido.sidoCode.toString(),
+        name: sido.sidoName
+      }))
+    ]
+
+    sidoLoading.value = false
+    console.log('시도 목록 로드 완료:', sidoList.value)
+  } catch (error) {
+    console.error('시도 목록 로딩 실패:', error)
+    sidoLoading.value = false
+    sidoError.value = true
+
+    // 에러 발생 시 기본 데이터로 대체
+    sidoList.value = [
+      { code: '0', name: '전국' },
+      { code: '1', name: '서울' },
+      { code: '2', name: '인천' },
+      { code: '3', name: '대전' },
+      { code: '4', name: '대구' },
+      { code: '5', name: '광주' },
+      { code: '6', name: '부산' },
+      { code: '7', name: '울산' }
+    ]
+  }
+}
+
 
 const tripForm = reactive({
   title: '',
@@ -171,6 +209,20 @@ const goBack = () => {
     router.push('/trip-plan')
   }
 }
+
+onMounted(async () => {
+  try {
+    console.log('컴포넌트 마운트 - 데이터 로딩 시작')
+
+    // 시도 목록 먼저 로드
+    await fetchSidos()
+    console.log('초기 데이터 로딩 완료')
+  } catch (error) {
+    console.error('초기 데이터 로딩 실패:', error)
+    // 사용자에게 오류 표시
+    alert('데이터를 불러오는 중 오류가 발생했습니다. 페이지를 새로고침 해주세요.')
+  }
+})
 </script>
 
 <style scoped>

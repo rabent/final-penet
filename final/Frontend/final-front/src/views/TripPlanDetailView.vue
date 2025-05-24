@@ -97,21 +97,21 @@
 
             <div class="item-content">
               <div class="item-header">
-                <h3 class="item-title">{{ snippet.attraction?.name || '관광지 정보 없음' }}</h3>
+                <h3 class="item-title">{{ snippet.attraction?.title || '관광지 정보 없음' }}</h3>
                 <div class="item-actions">
                   <button @click="editItem(snippet)" class="edit-item-btn">편집</button>
                   <button @click="deleteItem(snippet.id)" class="delete-item-btn">삭제</button>
                 </div>
               </div>
 
-              <p class="item-description" v-if="snippet.attraction?.description">
-                {{ snippet.attraction.description }}
+              <p class="item-description" v-if="snippet.attraction?.tel">
+                {{ snippet.attraction.tel }}
               </p>
 
               <div class="item-details">
-                <div class="item-location" v-if="snippet.attraction?.address">
+                <div class="item-location" v-if="snippet.attraction?.addr1">
                   <span class="icon">📍</span>
-                  {{ snippet.attraction.address }}
+                  {{ snippet.attraction.addr1 }}
                 </div>
 
                 <div class="item-cost" v-if="snippet.price">
@@ -194,7 +194,7 @@ const getTotalCost = computed(() => {
 const getUniqueLocations = computed(() => {
   if (!snippets.value) return 0
   const locations = snippets.value
-    .map(snippet => snippet.attraction?.address)
+    .map(snippet => snippet.attraction?.addr1)
     .filter(location => location)
   return new Set(locations).size
 })
@@ -240,7 +240,7 @@ const editItem = (snippet) => {
 const deleteItem = async (snippetId) => {
   if (confirm('정말로 이 일정을 삭제하시겠습니까?')) {
     try {
-      await api.delete(`/trips/${planId.value}/snippets/${snippetId}`)
+      await api.delete(`/trips/${planId.value}/${snippetId}`)
       snippets.value = snippets.value.filter(snippet => snippet.id !== snippetId)
       alert('일정이 삭제되었습니다.')
     } catch (error) {

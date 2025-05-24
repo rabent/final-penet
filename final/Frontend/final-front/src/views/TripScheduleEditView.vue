@@ -34,12 +34,9 @@
             </div>
 
             <div class="attraction-details">
-              <h3>{{ snippet.attraction.name }}</h3>
-              <p class="attraction-address">{{ snippet.attraction.address }}</p>
+              <h3>{{ snippet.attraction.title }}</h3>
+              <p class="attraction-address">{{ snippet.attraction.addr1 }}</p>
               <div class="attraction-meta">
-                <span class="category-tag" :class="getCategoryClass(snippet.attraction.category)">
-                  {{ getCategoryText(snippet.attraction.category) }}
-                </span>
               </div>
             </div>
           </div>
@@ -164,7 +161,7 @@ const fetchData = async () => {
     tripPlan.value = planResponse.data.plan
 
     // 특정 일정 조회
-    const snippetResponse = await api.get(`/trips/${planId}/snippets/${snippetId}`)
+    const snippetResponse = await api.get(`/trips/${planId}/${snippetId}`)
     snippet.value = snippetResponse.data
 
     // 폼 데이터 설정
@@ -206,7 +203,7 @@ const handleSubmit = async () => {
       schedule: itemForm.description
     }
 
-    const response = await api.put(`/trips/${planId}/snippets/${snippetId}`, formData)
+    const response = await api.put(`/trips/${planId}/${snippetId}`, formData)
     console.log('일정 수정 성공:', response.data)
 
     alert('여행 일정이 성공적으로 수정되었습니다!')
