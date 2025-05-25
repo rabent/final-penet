@@ -15,7 +15,7 @@ public interface TripSnippetRepository extends JpaRepository<TripSnippet, Intege
     // 특정 plan에 해당하는 모든 스니펫 조회
     List<TripSnippet> findByPlan(TripPlan plan);
 
-    @Query("SELECT new com.example.demo.model.dto.TPsnippet.TPsnippetSummaryDto(t.id, t.price, null) " +
+    @Query("SELECT new com.example.demo.model.dto.TPsnippet.TPsnippetSummaryDto(t.id, t.price, a.no, null) " +
             "FROM TripSnippet t JOIN t.attraction a WHERE t.plan = :plan")
     List<TPsnippetSummaryDto> getTripSnippetSummaryById(@Param("plan") TripPlan plan);
 }

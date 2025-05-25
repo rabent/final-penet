@@ -15,4 +15,12 @@ public class TripPlanSummaryDto {
     private String planName;
 
     private String plan;
+
+    private String startDate;
+
+    private String endDate;
+
+    private String location;
+
+    private Integer budget=0;
 }
