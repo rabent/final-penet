@@ -28,6 +28,9 @@ jobs:
       - name: Test with Gradle
         run: |
           ./gradlew test --info
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+          JWT_KEY: ${{ secrets.JWT_KEY }}
 
 
       - name: test report upload
