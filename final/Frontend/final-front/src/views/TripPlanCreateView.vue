@@ -31,7 +31,7 @@
           <textarea
             id="description"
             v-model="tripForm.description"
-            maxlength="500"
+            maxlength="100"
             rows="4"
             placeholder="이번 여행에 대한 간단한 설명을 적어주세요"
           ></textarea>
