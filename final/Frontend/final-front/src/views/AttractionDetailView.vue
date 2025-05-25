@@ -32,6 +32,64 @@
         ].filter(img => img)"
       />
 
+      <!-- AI 팁 섹션 -->
+      <div class="ai-tip-section">
+        <div class="ai-tip-header">
+          <h2><i class="fas fa-lightbulb"></i> AI 추천 팁</h2>
+          <p class="ai-tip-description">AI가 이 관광지에 대한 맞춤 팁을 제공해드립니다</p>
+        </div>
+        
+        <!-- AI 팁이 로드되지 않았을 때 -->
+        <div v-if="!aiTip.loaded && !aiTip.loading" class="ai-tip-placeholder">
+          <button 
+            class="get-ai-tip-button" 
+            @click="fetchAiTip"
+            :disabled="aiTip.loading"
+          >
+            <i class="fas fa-magic"></i>
+            AI 팁 받아보기
+          </button>
+        </div>
+
+        <!-- AI 팁 로딩 중 -->
+        <div v-if="aiTip.loading" class="ai-tip-loading">
+          <div class="ai-spinner"></div>
+          <p>AI가 맞춤 팁을 생성하고 있습니다...</p>
+        </div>
+
+        <!-- AI 팁 내용 -->
+        <div v-if="aiTip.loaded && aiTip.content" class="ai-tip-content">
+          <div class="tip-card">
+            <div class="tip-icon">
+              <i class="fas fa-robot"></i>
+            </div>
+            <div class="tip-text">
+              <p>{{ aiTip.content }}</p>
+            </div>
+            <button 
+              class="refresh-tip-button" 
+              @click="fetchAiTip"
+              :disabled="aiTip.loading"
+              title="새로운 팁 받기"
+            >
+              <i class="fas fa-refresh"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- AI 팁 로드 실패 -->
+        <div v-if="aiTip.loaded && aiTip.error" class="ai-tip-error">
+          <div class="error-card">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>AI 팁을 가져오는데 실패했습니다.</p>
+            <button class="retry-button" @click="fetchAiTip">
+              <i class="fas fa-redo"></i>
+              다시 시도
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- 주요 정보 섹션 -->
       <div class="info-grid">
         <div class="info-card">
@@ -48,10 +106,9 @@
           <h3><i class="fas fa-globe"></i> 홈페이지</h3>
           <a :href="attraction.homepage" target="_blank">바로가기</a>
         </div>
-
       </div>
 
-      <!-- 지도 섹션 추가 -->
+      <!-- 지도 섹션 -->
       <div class="map-section">
         <h2><i class="fas fa-map"></i> 위치 정보</h2>
         <div id="kakaoMap" class="map-container">
@@ -90,7 +147,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { KakaoMap, KakaoMapMarker } from 'vue3-kakao-maps'
 import api from '@/utils/axios'
@@ -101,6 +158,14 @@ const router = useRouter()
 const attraction = ref(null)
 const isLoading = ref(true)
 
+// AI 팁 관련 반응형 상태
+const aiTip = reactive({
+  content: '',
+  loading: false,
+  loaded: false,
+  error: false
+})
+
 const fetchAttractionDetail = async () => {
   try {
     const response = await api.get(`/attractions/${route.params.id}`)
@@ -109,6 +174,27 @@ const fetchAttractionDetail = async () => {
     console.error('관광지 상세 정보 로딩 실패:', error)
   } finally {
     isLoading.value = false
+  }
+}
+
+// AI 팁 가져오기 함수
+const fetchAiTip = async () => {
+  if (!attraction.value) return
+  
+  // 상태 초기화
+  aiTip.loading = true
+  aiTip.error = false
+  
+  try {
+    const response = await api.get(`/ai/tip/${attraction.value.no}`)
+    aiTip.content = response.data.tip
+    aiTip.loaded = true
+  } catch (error) {
+    console.error('AI 팁 로딩 실패:', error)
+    aiTip.error = true
+    aiTip.loaded = true
+  } finally {
+    aiTip.loading = false
   }
 }
 
@@ -160,6 +246,160 @@ onMounted(() => {
   gap: 1rem;
   align-items: center;
   flex-wrap: wrap;
+}
+
+/* AI 팁 섹션 스타일 */
+.ai-tip-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  color: white;
+}
+
+.ai-tip-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.ai-tip-description {
+  opacity: 0.9;
+  margin-bottom: 1.5rem;
+}
+
+.ai-tip-placeholder {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.get-ai-tip-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem 2rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50px;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.get-ai-tip-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.get-ai-tip-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ai-tip-loading {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.ai-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+.ai-tip-content .tip-card {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  position: relative;
+}
+
+.tip-icon {
+  font-size: 1.5rem;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.tip-text {
+  flex: 1;
+  line-height: 1.6;
+}
+
+.refresh-tip-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  backdrop-filter: blur(5px);
+}
+
+.refresh-tip-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: rotate(180deg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.refresh-tip-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.refresh-tip-button i {
+  color: white;
+  font-size: 14px;
+}
+
+.ai-tip-error .error-card {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.retry-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 25px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-button:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .info-grid {
@@ -226,14 +466,6 @@ onMounted(() => {
 .tag.location {
   background: #e8f6f3;
   color: #16a085;
-}
-
-.views {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #666;
-  font-size: 0.9rem;
 }
 
 .spinner {
@@ -308,7 +540,6 @@ onMounted(() => {
   transform: translateX(-3px);
 }
 
-/* 지도 섹션 스타일 추가 */
 .map-section {
   background: white;
   padding: 2rem;
