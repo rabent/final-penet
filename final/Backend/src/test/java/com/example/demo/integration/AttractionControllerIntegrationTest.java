@@ -9,10 +9,13 @@ import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -23,8 +26,12 @@ import com.example.demo.model.entity.Attraction;
 import com.example.demo.repository.AttractionRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("local")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 //@Transactional
 public class AttractionControllerIntegrationTest {
 
@@ -60,7 +67,16 @@ public class AttractionControllerIntegrationTest {
         testAttraction = attractionRepository.save(testAttraction);
     }
 
+    @Autowired
+    private Environment env;
 
+    @Test
+    void checkProfile() {
+        System.out.println("Active Profiles: " + Arrays.toString(env.getActiveProfiles()));
+        System.out.println("SQL Init Mode: " + env.getProperty("spring.sql.init.mode"));
+        System.out.println("Schema Locations: " + env.getProperty("spring.sql.init.schema-locations"));
+        System.out.println("Data Locations: " + env.getProperty("spring.sql.init.data-locations"));
+    }
     @Test
     void getAttractions_returnsPageOfAttractionSummaries() throws Exception {
         mockMvc.perform(get("/attractions")

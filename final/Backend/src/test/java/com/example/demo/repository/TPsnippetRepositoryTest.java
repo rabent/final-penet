@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
@@ -19,7 +20,8 @@ import com.example.demo.model.entity.TripSnippet;
 import com.example.demo.model.entity.User;
 
 @DataJpaTest
-@Disabled("추후 수정 예정")
+@ActiveProfiles("local")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class TPsnippetRepositoryTest {
 
     @Autowired
@@ -58,6 +60,9 @@ class TPsnippetRepositoryTest {
                 .planName("제주도 3박 4일")
                 .plan("제주도 여행 계획")
                 .user(user)
+                .startDate("2025-01-13")
+                .endDate("2025-02-23")
+                .location("제주")
                 .build();
         tripPlan1 = entityManager.persist(tripPlan1);
 
@@ -65,6 +70,9 @@ class TPsnippetRepositoryTest {
                 .planName("부산 여행")
                 .plan("부산 여행 계획")
                 .user(user)
+                .startDate("2025-01-03")
+                .endDate("2025-02-23")
+                .location("부산")
                 .build();
         tripPlan2 = entityManager.persist(tripPlan2);
 
@@ -100,32 +108,40 @@ class TPsnippetRepositoryTest {
         snippet1 = TripSnippet.builder()
                 .plan(tripPlan1)
                 .attraction(attraction1)
-                .price("10000원")
+                .price(10000)
                 .schedule("첫째날 오전 10시")
+                .category("관광")
+                .date("2025-01-23")
                 .build();
         entityManager.persist(snippet1);
 
         snippet2 = TripSnippet.builder()
                 .plan(tripPlan1)
                 .attraction(attraction2)
-                .price("15000원")
+                .price(15000)
                 .schedule("둘째날 오후 2시")
+                .category("체험")
+                .date("2025-05-13")
                 .build();
         entityManager.persist(snippet2);
 
         snippet3 = TripSnippet.builder()
                 .plan(tripPlan2)
                 .attraction(attraction3)
-                .price("5000원")
+                .price(5000)
                 .schedule("첫째날 오전 9시")
+                .category("여행")
+                .date("2025-01-13")
                 .build();
         entityManager.persist(snippet3);
 
         snippet4 = TripSnippet.builder()
                 .plan(tripPlan2)
                 .attraction(attraction1) // 제주도 관광지지만 부산 여행 계획에 포함
-                .price("12000원")
+                .price(12000)
                 .schedule("둘째날 오전 11시")
+                .category("관광")
+                .date("2025-02-23")
                 .build();
         entityManager.persist(snippet4);
 
@@ -147,7 +163,7 @@ class TPsnippetRepositoryTest {
         assertThat(snippetsPlan1.stream().map(snippet -> snippet.getAttraction().getTitle()).toList())
                 .containsExactlyInAnyOrder("성산일출봉", "우도");
         assertThat(snippetsPlan1.stream().map(TripSnippet::getPrice).toList())
-                .containsExactlyInAnyOrder("10000원", "15000원");
+                .containsExactlyInAnyOrder(10000, 15000);
         assertThat(snippetsPlan1.stream().map(TripSnippet::getSchedule).toList())
                 .containsExactlyInAnyOrder("첫째날 오전 10시", "둘째날 오후 2시");
 
@@ -155,7 +171,7 @@ class TPsnippetRepositoryTest {
         assertThat(snippetsPlan2.stream().map(snippet -> snippet.getAttraction().getTitle()).toList())
                 .containsExactlyInAnyOrder("해운대 해수욕장", "성산일출봉");
         assertThat(snippetsPlan2.stream().map(TripSnippet::getPrice).toList())
-                .containsExactlyInAnyOrder("5000원", "12000원");
+                .containsExactlyInAnyOrder(5000, 12000);
         assertThat(snippetsPlan2.stream().map(TripSnippet::getSchedule).toList())
                 .containsExactlyInAnyOrder("첫째날 오전 9시", "둘째날 오전 11시");
     }
@@ -176,8 +192,8 @@ class TPsnippetRepositoryTest {
 
         boolean hasPricesForPlan1 = summaryPlan1.stream()
                 .allMatch(dto -> {
-                    String price = dto.getPrice();
-                    return price != null && (price.equals("10000원") || price.equals("15000원"));
+                    Integer price = dto.getPrice();
+                    return price != null && (price.equals(10000) || price.equals(15000));
                 });
         assertThat(hasPricesForPlan1).isTrue();
 
@@ -185,8 +201,8 @@ class TPsnippetRepositoryTest {
         
         boolean hasPricesForPlan2 = summaryPlan2.stream()
                 .allMatch(dto -> {
-                    String price = dto.getPrice();
-                    return price != null && (price.equals("5000원") || price.equals("12000원"));
+                    Integer price = dto.getPrice();
+                    return price != null && (price.equals(5000) || price.equals(12000));
                 });
         assertThat(hasPricesForPlan2).isTrue();
     }
@@ -199,6 +215,9 @@ class TPsnippetRepositoryTest {
                 .planName("없는 여행")
                 .plan("없는 여행 계획")
                 .user(user)
+                .startDate("2025-01-13")
+                .endDate("2025-02-23")
+                .location("제주")
                 .build();
         entityManager.persist(plan);
         List<TripSnippet> snippets = tripSnippetRepository.findByPlan(plan);

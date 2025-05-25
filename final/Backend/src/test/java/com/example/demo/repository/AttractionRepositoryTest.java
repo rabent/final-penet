@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
@@ -19,7 +20,8 @@ import com.example.demo.model.dto.Attraction.AttractionSummaryDto;
 import com.example.demo.model.entity.Attraction;
 
 @DataJpaTest
-@ActiveProfiles("test") // 테스트용 프로필 활성화 (application-test.properties 또는 application-test.yml 사용)
+@ActiveProfiles("local")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class AttractionRepositoryTest {
 
     @Autowired
