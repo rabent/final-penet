@@ -15,7 +15,9 @@ import lombok.Setter;
 public class TPsnippetSummaryDto {
     private Integer id;
 
-    private String price;
+    private Integer price;
+
+    private Integer no;
 
     private AttractionSummaryDto attraction;
 }
