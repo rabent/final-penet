@@ -32,7 +32,7 @@
         <!-- 카드 액션 버튼들 -->
         <div class="card-actions">
           <button
-            @click.stop="goToDetail(plan.id)"
+            @click.stop="goToDetail(plan.id,imageUrls[plan.location])"
             class="action-btn view-btn"
             title="상세보기"
           >
@@ -47,10 +47,10 @@
           </button>
         </div>
 
-        <div class="plan-image" @click="goToDetail(plan.id)">
-          <img :src="getLocationImage(plan)" loading="lazy" :alt="plan.title" />
+        <div class="plan-image" @click="goToDetail(plan.id,imageUrls[plan.location])">
+          <img :src="imageUrls[plan.location]" loading="lazy" :alt="plan.title" />
         </div>
-        <div class="plan-content" @click="goToDetail(plan.id)">
+        <div class="plan-content" @click="goToDetail(plan.id,imageUrls[plan.location])">
           <h3 class="plan-title">{{ plan.title }}</h3>
           <p class="plan-description">{{ plan.description }}</p>
           <div class="plan-info">
@@ -141,7 +141,8 @@ const loading = ref(true)
 const tripPlans = ref([])
 const currentPage = ref(1)
 const itemsPerPage = 6
-
+const errorMessage = ref('')
+const imageUrls = ref({})
 // 삭제 관련 상태
 const showDeleteModal = ref(false)
 const planToDelete = ref(null)
@@ -167,6 +168,10 @@ const visiblePages = computed(() => {
   }
   return pages
 })
+
+const getUrl = (region) => {
+  imageUrl=getLocationImage(region)
+}
 
 const fetchTripPlans = async () => {
   try {
@@ -237,59 +242,55 @@ const confirmDelete = async () => {
   }
 }
 
-// 지역별 이미지 매핑 함수 (수정된 버전)
-const getLocationImage = (plan) => {
-  if (plan.imageUrl && !plan.imageUrl.includes('placeholder')) {
-    return plan.imageUrl
+const regionImageCounts = {
+  부산 : 3,
+  충청북도 : 3,
+  충청남도 : 3,
+  대구 : 3,
+  대전 : 3,
+  강원특별자치도 : 3,
+  광주 : 3,
+  경기도 : 3,
+  경상북도 : 3,
+  경상남도 : 3,
+  인천 : 3,
+  제주도 : 3,
+  전북특별자치도 : 3,
+  전라남도 : 3,
+  세종특별자치시 : 3,
+  서울 : 3,
+  울산 : 3
+}
+
+const getLocationImage = async (region) => {
+  loading.value = true
+  errorMessage.value = ''
+
+  try {
+    const imageCount = regionImageCounts[region] || 3
+    const randomIndex = Math.floor(Math.random() * imageCount) + 1
+
+    console.log(`Loading: ${region}_${randomIndex}.jpg`)
+
+    // 동적 import로 필요한 이미지만 로드
+    const module = await import(`@/assets/regions/${region}/${region}_${randomIndex}.jpg`)
+    return module.default
+
+  } catch (error) {
+    console.error(`이미지 로드 실패: ${region}`, error)
+    errorMessage.value = `${region} 이미지를 찾을 수 없습니다.`
+
+    // 기본 이미지 로드 시도
+    try {
+      const defaultModule = await import('@/assets/regions/default.jpg')
+      return defaultModule.default
+    } catch (defaultError) {
+      console.error('기본 이미지도 로드 실패:', defaultError)
+      return null
+    }
+  } finally {
+    loading.value = false
   }
-
-  const locationImages = {
-    '서울': 'https://picsum.photos/seed/seoul/400/250',
-    '인천': 'https://picsum.photos/seed/incheon/400/250',
-    '대전': 'https://picsum.photos/seed/daejeon/400/250',
-    '대구': 'https://picsum.photos/seed/daegu/400/250',
-    '광주': 'https://picsum.photos/seed/gwangju/400/250',
-    '부산': 'https://picsum.photos/seed/busan/400/250',
-    '울산': 'https://picsum.photos/seed/ulsan/400/250',
-    '세종특별자치시': 'https://picsum.photos/seed/sejong/400/250',
-    '세종': 'https://picsum.photos/seed/sejong/400/250',
-    '경기도': 'https://picsum.photos/seed/gyeonggi/400/250',
-    '경기': 'https://picsum.photos/seed/gyeonggi/400/250',
-    '강원특별자치도': 'https://picsum.photos/seed/gangwon/400/250',
-    '강원도': 'https://picsum.photos/seed/gangwon/400/250',
-    '강원': 'https://picsum.photos/seed/gangwon/400/250',
-    '충청북도': 'https://picsum.photos/seed/chungbuk/400/250',
-    '충북': 'https://picsum.photos/seed/chungbuk/400/250',
-    '충청남도': 'https://picsum.photos/seed/chungnam/400/250',
-    '충남': 'https://picsum.photos/seed/chungnam/400/250',
-    '경상북도': 'https://picsum.photos/seed/gyeongbuk/400/250',
-    '경북': 'https://picsum.photos/seed/gyeongbuk/400/250',
-    '경상남도': 'https://picsum.photos/seed/gyeongnam/400/250',
-    '경남': 'https://picsum.photos/seed/gyeongnam/400/250',
-    '전북특별자치도': 'https://picsum.photos/seed/jeonbuk/400/250',
-    '전라북도': 'https://picsum.photos/seed/jeonbuk/400/250',
-    '전북': 'https://picsum.photos/seed/jeonbuk/400/250',
-    '전라남도': 'https://picsum.photos/seed/jeonnam/400/250',
-    '전남': 'https://picsum.photos/seed/jeonnam/400/250',
-    '제주도': 'https://picsum.photos/seed/jeju/400/250',
-    '제주': 'https://picsum.photos/seed/jeju/400/250'
-  }
-
-  const location = (plan.location || '').trim()
-
-  if (locationImages[location]) {
-    return locationImages[location]
-  }
-
-  const matchedLocation = Object.keys(locationImages).find(key => {
-    return location.includes(key) || key.includes(location)
-  })
-
-  if (matchedLocation) {
-    return locationImages[matchedLocation]
-  }
-
-  return 'https://picsum.photos/seed/travel/400/250'
 }
 
 const changePage = (page) => {
@@ -298,8 +299,13 @@ const changePage = (page) => {
   }
 }
 
-const goToDetail = (planId) => {
-  router.push(`/trip-plan/${planId}`)
+const goToDetail = (planId, imageUrl) => {
+  router.push({
+  path : `/trip-plan/${planId}`,
+  query: {
+        imageUrl: encodeURIComponent(imageUrl)
+      }
+  })
 }
 
 const createNewPlan = () => {
@@ -335,8 +341,24 @@ const formatBudget = (budget) => {
   return new Intl.NumberFormat('ko-KR').format(budget) + '원'
 }
 
+const fetchImage = async () => {
+                     // 반복문으로 각 지역의 이미지 로드
+                     const regions = Object.keys(regionImageCounts)
+                     for (const region of regions) {  // 👈 index 없이 in 사용
+                       try {
+                         const imageUrl = await getLocationImage(region)
+                         imageUrls.value[region] = imageUrl  // 지역명을 키로 저장
+                       } catch (error) {
+                         console.error(`${region} 이미지 로드 실패:`, error)
+                         imageUrls.value[region] = null
+                       }
+                     }
+                     loading.value = false
+                   }
+
 onMounted(() => {
   fetchTripPlans()
+  fetchImage()
 })
 </script>
 

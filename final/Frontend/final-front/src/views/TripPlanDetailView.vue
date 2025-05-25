@@ -16,7 +16,7 @@
 
         <div class="trip-header-content">
           <div class="trip-image">
-            <img src="" :alt="tripPlan.planName" />
+            <img :src="imageUrl" :alt="tripPlan.planName" />
             <div class="trip-overlay">
             <button @click="editPlan" class="edit-plan-btn">
                     ✏️ 여행 계획 편집
@@ -177,6 +177,7 @@ const loading = ref(true)
 const tripPlan = ref(null)
 const snippets = ref([])
 const planId = ref(null)
+const imageUrl = ref('')
 
 const getTotalDays = computed(() => {
   if (!tripPlan.value) return 0
@@ -304,6 +305,9 @@ const formatBudget = (budget) => {
 
 onMounted(() => {
   fetchTripPlan()
+   if (route.query.imageUrl) {
+      imageUrl.value = decodeURIComponent(route.query.imageUrl)
+   }
 })
 </script>
 
