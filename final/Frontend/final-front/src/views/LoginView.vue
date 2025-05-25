@@ -44,15 +44,25 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/utils/axios'
 
 const router = useRouter()
 
 const loginForm = reactive({
-  email: '',    // userId를 email로 변경
-  password: ''
+  email: '',
+  password: '',
+  rememberMe: false
+})
+
+// 컴포넌트가 마운트될 때 저장된 이메일 불러오기
+onMounted(() => {
+  const savedEmail = localStorage.getItem('savedEmail')
+  if (savedEmail) {
+    loginForm.email = savedEmail
+    loginForm.rememberMe = true
+  }
 })
 
 const handleLogin = async () => {
@@ -62,9 +72,13 @@ const handleLogin = async () => {
       password: loginForm.password
     })
 
-    console.log('로그인 응답:', response.data) // 응답 데이터 확인용
+    // 로그인 성공 시 이메일 저장 처리
+    if (loginForm.rememberMe) {
+      localStorage.setItem('savedEmail', loginForm.email)
+    } else {
+      localStorage.removeItem('savedEmail')
+    }
 
-    // response.data에서 직접 값을 가져옴
     const token = response.data.Authorization
     const userId = response.data.userId
 
@@ -152,6 +166,17 @@ const handleLogin = async () => {
   align-items: center;
   gap: 8px;
   color: #666;
+  cursor: pointer;
+}
+
+.remember-me input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.remember-me span {
+  font-size: 14px;
 }
 
 .find-links {
