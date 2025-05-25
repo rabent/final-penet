@@ -18,6 +18,8 @@ import TripPlanCreate from '../views/TripPlanCreateView.vue'
 import TripScheduleCreate from '../views/TripScheduleCreateView.vue'
 import TripPlanEdit from '../views/TripPlanEditView.vue'
 import TripScheduleEdit from '../views/TripScheduleEditView.vue'
+import FindIdView from '../views/FindIdView.vue'
+import FindPasswordView from '../views/FindPasswordView.vue'
 
 const routes = [
   {
@@ -113,6 +115,16 @@ const routes = [
     name: 'TripScheduleCreate',
     component: TripScheduleCreate,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/find-id',
+    name: 'FindId',
+    component: FindIdView
+  },
+  {
+    path: '/find-password',
+    name: 'FindPassword',
+    component: FindPasswordView
   }
 ]
 
