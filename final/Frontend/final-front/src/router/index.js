@@ -12,6 +12,8 @@ import BoardDetail from '../views/BoardDetailView.vue'
 import BoardEditView from '../views/BoardEditView.vue'
 import Attractions from '../views/AttractionView.vue'
 import AttractionDetailView from '../views/AttractionDetailView.vue'
+import FindIdView from '../views/FindIdView.vue'
+import FindPasswordView from '../views/FindPasswordView.vue'
 
 
 const routes = [
@@ -68,6 +70,16 @@ const routes = [
     path: '/attractions/:id',
     name: 'AttractionDetail',
     component: AttractionDetailView,
+  },
+  {
+    path: '/find-id',
+    name: 'FindId',
+    component: FindIdView
+  },
+  {
+    path: '/find-password',
+    name: 'FindPassword',
+    component: FindPasswordView
   }
   // {
   //   path: '/trip-plan',
