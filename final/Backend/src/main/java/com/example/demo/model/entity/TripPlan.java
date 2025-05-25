@@ -34,8 +34,20 @@ public class TripPlan {
     @Column(name="plan_name", length = 50, nullable=false)
     private String planName;
 
-    @Column(name = "plan", length = 200, nullable = false)
+    @Column(name = "plan", length = 100, nullable = false)
     private String plan;
+
+    @Column(name = "start_date", nullable = false)
+    private String startDate;
+
+    @Column(name = "end_date", nullable = false)
+    private String endDate;
+
+    @Column(name = "location", nullable = false , length = 50)
+    private String location;
+
+    @Column(name = "budget")
+    private Integer budget;
 
     public void addSnippet(TripSnippet snippet) {
         this.snippets.add(snippet);
