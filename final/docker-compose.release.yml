@@ -1,7 +1,7 @@
 services:
   backend:
     build:
-      context: ./backend
+      context: ./Backend
       dockerfile: Dockerfile.test
     container_name: spring-backend
     environment:
@@ -23,13 +23,13 @@ services:
 
   frontend:
     build:
-      context: ./frontend/final-front
+      context: ./Frontend/final-front
     container_name: vue-frontend
     restart: always
     ports:
       - "8080:8080"  # 외부 8080 포트를 컨테이너 80 포트에 매핑
     volumes:
-      - ./frontend/final-front/nginx.conf:/etc/nginx/nginx.conf # Nginx 설정 마운트
+      - ./Frontend/final-front/nginx.conf:/etc/nginx/nginx.conf # Nginx 설정 마운트
     depends_on:
       - backend
     networks:
