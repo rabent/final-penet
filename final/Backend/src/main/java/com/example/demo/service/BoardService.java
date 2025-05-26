@@ -43,6 +43,16 @@ public class BoardService {
     }
 
     /**
+     * 메인 화면용 최근 3개 찾기
+     *
+     *
+     * @return 최근 게시물 3개
+     */
+    public Page<BoardSummaryDto> getThreeBoardSummaries() {
+        return getAllBoardSummaries(0, 3);
+    }
+
+    /**
      * 모든 게시글의 요약 정보를 페이징하여 조회 (페이지 크기 지정)
      *
      * @param page 페이지 번호 (0부터 시작)

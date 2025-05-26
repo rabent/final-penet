@@ -167,7 +167,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api from '@/utils/axios'
 
@@ -243,6 +243,7 @@ const deleteItem = async (snippetId) => {
     try {
       await api.delete(`/trips/${planId.value}/${snippetId}`)
       snippets.value = snippets.value.filter(snippet => snippet.id !== snippetId)
+      fetchTripPlan()
       alert('일정이 삭제되었습니다.')
     } catch (error) {
       console.error('일정 삭제 실패:', error)
@@ -305,8 +306,12 @@ const formatBudget = (budget) => {
 
 onMounted(() => {
   fetchTripPlan()
+
    if (route.query.imageUrl) {
       imageUrl.value = decodeURIComponent(route.query.imageUrl)
+      sessionStorage.setItem('imageUrl', route.query.imageUrl)
+   } else {
+    imageUrl.value =  decodeURIComponent(sessionStorage.getItem('imageUrl'))
    }
 })
 </script>
