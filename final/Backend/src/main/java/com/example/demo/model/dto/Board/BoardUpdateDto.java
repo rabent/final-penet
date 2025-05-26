@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -18,6 +20,9 @@ public class BoardUpdateDto {
     
     @Size(max=500)
     private String content;
+
+    // 이미지 파일명 목록 (선택사항 - null이면 이미지 수정하지 않음)
+    private List<String> imageFileNames;
 
     public void updateEntity(Board board) {
         if (this.title != null) {
