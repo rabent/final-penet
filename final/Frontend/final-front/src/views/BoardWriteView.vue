@@ -73,7 +73,7 @@ const submitPost = async () => {
     }
 
     // 실제 환경에서는 API 호출
-    const response = await api.post('http://localhost:8080/api/boards', postForm);
+    const response = await api.post('/boards', postForm);
 
     // TODO: 백엔드 API 완성 후 주석 해제
     if (response.data) {

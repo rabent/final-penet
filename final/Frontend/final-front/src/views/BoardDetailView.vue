@@ -132,7 +132,7 @@ const loadPost = async () => {
 const loadComments = async () => {
   try {
     // 실제 환경에서는 API 호출
-    // const response = await axios.get(`http://localhost:8080/api/boards/${postId}/comments`);
+    // const response = await axios.get(`/boards/${postId}/comments`);
     // comments.value = response.data;
 
     // 임시 데이터 (백엔드 연동 전까지 사용)
