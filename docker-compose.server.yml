@@ -10,8 +10,8 @@ services:
       - DB_NAME=ssafy
       - DB_USERNAME=ssafy
       - DB_PASSWORD=ssafy
-      - JWT_KEY=
-      - API_KEY=
+      - JWT_KEY=${JWT_KEY}
+      - API_KEY=${API_KEY}
     volumes:
       - gradle-cache:/root/.gradle
     restart: always
