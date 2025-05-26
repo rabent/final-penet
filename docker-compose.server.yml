@@ -1,8 +1,6 @@
 services:
   backend:
-    build:
-      context: ./Backend
-      dockerfile: Dockerfile.test
+    image: rabent0207/final-penet-backend:latest  # build 대신 image
     container_name: spring-backend
     environment:
       - SPRING_PROFILES_ACTIVE=prod
@@ -15,28 +13,26 @@ services:
       - JWT_KEY=
       - API_KEY=
     volumes:
-      - gradle-cache:/root/.gradle  # Gradle 캐시 볼륨
+      - gradle-cache:/root/.gradle
     restart: always
     networks:
       - app-network
-      # 필요한 환경변수 추가 (DB 설정 등)
 
   frontend:
-    build:
-      context: ./Frontend/final-front
+    image: rabent0207/final-penet-frontend:latest  # build 대신 image
     container_name: vue-frontend
     restart: always
     ports:
-      - "8080:8080"  # 외부 8080 포트를 컨테이너 80 포트에 매핑
+      - "8080:8080"
     volumes:
-      - ./Frontend/final-front/nginx.conf:/etc/nginx/nginx.conf # Nginx 설정 마운트
+      - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - backend
     networks:
       - app-network
 
 volumes:
-  gradle-cache:  # 도커 관리 볼륨 정의
+  gradle-cache:
 
 networks:
   app-network:
