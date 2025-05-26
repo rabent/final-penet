@@ -19,6 +19,7 @@ import com.example.demo.repository.TripSnippetRepository;
 import com.example.demo.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -100,12 +101,13 @@ public class TripPlanServiceTest {
                 .planName("서울 여행")
                 .plan("서울 여행 계획입니다.")
                 .user(testUser)
+                .budget(0)
                 .build();
 
         // 테스트용 TripSnippet 엔티티 생성
         testTripSnippet = TripSnippet.builder()
                 .id(1)
-                .price("10000원")
+                .price(10000)
                 .schedule("첫째날 오전")
                 .plan(testTripPlan)
                 .attraction(testAttraction)
@@ -115,16 +117,16 @@ public class TripPlanServiceTest {
         testSnippetSummaries = new ArrayList<>();
         TPsnippetSummaryDto snippetSummaryDto = new TPsnippetSummaryDto(
                 1,
-                "10000원",
+                10000,testAttractionSummaryDto.getNo(),
                 testAttractionSummaryDto
         );
         testSnippetSummaries.add(snippetSummaryDto);
 
         // 요청 DTO 생성
-        tripPlanRequestDto = new TripPlanRequestDto("부산 여행", "부산 여행 계획입니다.");
-        tripPlanUpdateDto = new TripPlanUpdateDto("제주 여행", "제주 여행 계획으로 변경합니다.");
-        tpSnippetRequestDto = new TPsnippetRequestDto("20000원", "둘째날 오후", 101);
-        tpSnippetUpdateDto = new TPsnippetUpdateDto("30000원", "셋째날 오전", 101);
+        tripPlanRequestDto = new TripPlanRequestDto("부산 여행", "부산 여행 계획입니다.", "", "","");
+        tripPlanUpdateDto = new TripPlanUpdateDto("제주 여행", "제주 여행 계획으로 변경합니다.", "", "", "");
+        tpSnippetRequestDto = new TPsnippetRequestDto(20000, "둘째날 오후","","", 101);
+        tpSnippetUpdateDto = new TPsnippetUpdateDto(30000, "셋째날 오전","","", 101);
     }
 
     @Test
@@ -132,7 +134,7 @@ public class TripPlanServiceTest {
     void getUserTripPlansTest() {
         // Given
         List<TripPlanSummaryDto> summaryDtos = Arrays.asList(
-                new TripPlanSummaryDto(1, "서울 여행", "서울 여행 계획입니다.")
+                new TripPlanSummaryDto(1, "서울 여행", "서울 여행 계획입니다.","","","",1)
         );
         Page<TripPlanSummaryDto> expectedPage = new PageImpl<>(summaryDtos);
 
@@ -163,7 +165,11 @@ public class TripPlanServiceTest {
 
         TripPlanResponseDto responseDto = new TripPlanResponseDto(
                 "부산 여행",
-                "부산 여행 계획입니다."
+                "부산 여행 계획입니다.",
+                "",
+                "",
+                "",
+                1
         );
 
         when(userRepository.findById(anyInt())).thenReturn(Optional.of(testUser));
@@ -189,6 +195,7 @@ public class TripPlanServiceTest {
         // Given
         when(tripPlanRepository.findById(anyInt())).thenReturn(Optional.of(testTripPlan));
         when(tripSnippetRepository.getTripSnippetSummaryById(any(TripPlan.class))).thenReturn(testSnippetSummaries);
+        when(attractionRepository.findById(anyInt())).thenReturn(Optional.of(testAttraction));
 
         // When
         TripPlanService.TripPlanWithSnippetsDto result = tripPlanService.getTripPlanById(1);
@@ -198,7 +205,7 @@ public class TripPlanServiceTest {
         assertEquals("서울 여행", result.getPlan().getPlanName());
         assertEquals(1, result.getSnippets().size());
         assertEquals("테스트 관광지", result.getSnippets().get(0).getAttraction().getTitle());
-        assertEquals("10000원", result.getSnippets().get(0).getPrice());
+        assertEquals(10000, result.getSnippets().get(0).getPrice());
         verify(tripPlanRepository, times(1)).findById(1);
         verify(tripSnippetRepository, times(1)).getTripSnippetSummaryById(testTripPlan);
     }
@@ -209,7 +216,7 @@ public class TripPlanServiceTest {
         // Given
         when(tripPlanRepository.findById(anyInt())).thenReturn(Optional.of(testTripPlan));
         when(tripSnippetRepository.getTripSnippetSummaryById(any(TripPlan.class))).thenReturn(testSnippetSummaries);
-
+        when(attractionRepository.findById(anyInt())).thenReturn(Optional.of(testAttraction));
         // When
         TripPlanService.TripPlanWithSnippetsDto result = tripPlanService.UpdateTripPlan(tripPlanUpdateDto, 1);
 
@@ -250,7 +257,7 @@ public class TripPlanServiceTest {
 
         // Then
         assertNotNull(result);
-        assertEquals("20000원", result.getPrice());
+        assertEquals(20000, result.getPrice());
         assertEquals("둘째날 오후", result.getSchedule());
         assertEquals("테스트 관광지", result.getAttraction().getTitle());
         verify(tripPlanRepository, times(1)).findById(1);
@@ -269,7 +276,7 @@ public class TripPlanServiceTest {
 
         // Then
         assertNotNull(result);
-        assertEquals("10000원", result.getPrice());
+        assertEquals(10000, result.getPrice());
         assertEquals("첫째날 오전", result.getSchedule());
         assertEquals("테스트 관광지", result.getAttraction().getTitle());
         verify(tripSnippetRepository, times(1)).findById(1);
@@ -303,7 +310,7 @@ public class TripPlanServiceTest {
 
         // Then
         assertNotNull(result);
-        assertEquals("30000원", result.getPrice());
+        assertEquals(30000, result.getPrice());
         assertEquals("셋째날 오전", result.getSchedule());
         assertEquals("테스트 관광지", result.getAttraction().getTitle());
         verify(tripSnippetRepository, times(1)).findById(1);
@@ -316,7 +323,7 @@ public class TripPlanServiceTest {
         // Given
         when(tripPlanRepository.findById(anyInt())).thenReturn(Optional.of(testTripPlan));
         when(tripSnippetRepository.getTripSnippetSummaryById(any(TripPlan.class))).thenReturn(testSnippetSummaries);
-
+        when(attractionRepository.findById(anyInt())).thenReturn(Optional.of(testAttraction));
         // When
         TripPlanService.TripPlanWithSnippetsDto result = tripPlanService.getTripPlanWithSnippets(1);
 

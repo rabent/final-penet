@@ -1,8 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.dto.Attraction.AttractionResponseDto;
-import com.example.demo.model.dto.Attraction.AttractionSearchCriteria;
-import com.example.demo.model.dto.Attraction.AttractionSummaryDto;
+import com.example.demo.model.dto.Attraction.*;
 import com.example.demo.service.AttractionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/attractions")
@@ -68,5 +68,32 @@ public class AttractionController {
             @Parameter(description = "관광지 ID", required = true, example = "1")
             @PathVariable Integer attrId) {
         return ResponseEntity.ok(attractionService.getAttractionDetail(attrId));
+    }
+
+    // 컨텐츠 정보 조회
+    @GetMapping("/contenttypes")
+    public ResponseEntity<List<ContentTypeDto>> getContentTypes() {
+        return ResponseEntity.ok(attractionService.getAllContentTypes());
+    }
+
+    // 시도 정보 조회
+    @GetMapping("/sidos")
+    public ResponseEntity<List<SidoDto>> getSidos() {
+        return ResponseEntity.ok(attractionService.getAllSidos());
+    }
+
+    // 구군 정보 조회
+    @GetMapping("/guguns")
+    public ResponseEntity<List<GugunDto>> getAllGuguns() {
+        return ResponseEntity.ok(attractionService.getAllGuguns());
+    }
+
+    @GetMapping("/searchByFilter")
+    public ResponseEntity<Page<AttractionResponseDto>> searchAttractions(
+            @ModelAttribute AttractionSearchRequestDto request,
+            @RequestParam(defaultValue = "0") int page) {
+
+        Page<AttractionResponseDto> result = attractionService.searchAttractions(request, page);
+        return ResponseEntity.ok(result);
     }
 }

@@ -45,6 +45,17 @@ public class BoardController {
         return ResponseEntity.ok(boardService.getAllBoardSummaries(page));
     }
 
+    @GetMapping("/main")
+    @Operation(summary = "최근 게시물 3개 조회", description = "최근 게시물 중 3개를 제공합니다")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공",
+                    content = @Content(schema = @Schema(implementation = Page.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    public ResponseEntity<Page<BoardSummaryDto>> boardThree() {
+        return ResponseEntity.ok(boardService.getThreeBoardSummaries());
+    }
+
     @PreAuthorize("isAuthenticated()")
     @PostMapping
     @Operation(summary = "새 게시글 작성", description = "새로운 게시글을 작성합니다. 인증이 필요한 작업입니다.")

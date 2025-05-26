@@ -25,6 +25,10 @@ WORKDIR /app
 # 빌드 단계에서 생성된 jar 파일 복사
 COPY --from=build /app/build/libs/*.jar app.jar
 
+ENV SPRING_PROFILES_ACTIVE=default
+ENV JAVA_OPTS=default
+ENV DB_HOST=host.docker.internal
+
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

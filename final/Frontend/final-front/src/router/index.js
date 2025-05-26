@@ -10,6 +10,16 @@ import Board from '../views/BoardView.vue'
 import BoardWrite from '../views/BoardWriteView.vue'
 import BoardDetail from '../views/BoardDetailView.vue'
 import BoardEditView from '../views/BoardEditView.vue'
+import Attractions from '../views/AttractionView.vue'
+import AttractionDetailView from '../views/AttractionDetailView.vue'
+import TripPlan from '../views/TripPlanView.vue'
+import TripPlanDetail from '../views/TripPlanDetailView.vue'
+import TripPlanCreate from '../views/TripPlanCreateView.vue'
+import TripScheduleCreate from '../views/TripScheduleCreateView.vue'
+import TripPlanEdit from '../views/TripPlanEditView.vue'
+import TripScheduleEdit from '../views/TripScheduleEditView.vue'
+import FindIdView from '../views/FindIdView.vue'
+import FindPasswordView from '../views/FindPasswordView.vue'
 
 const routes = [
   {
@@ -56,22 +66,66 @@ const routes = [
       requiresAuth: true // 인증이 필요한 페이지로 표시
     }
   }
-  // ,{
-  //   path: '/attractions',
-  //   name: 'Attractions',
-  //   // 지연 로딩 사용 (코드 스플리팅)
-  //   component: () => import(/* webpackChunkName: "attractions" */ '../views/Attractions.vue')
-  // },
-  // {
-  //   path: '/board',
-  //   name: 'Board',
-  //   component: () => import(/* webpackChunkName: "board" */ '../views/Board.vue')
-  // },
-  // {
-  //   path: '/trip-plan',
-  //   name: 'TripPlan',
-  //   component: () => import(/* webpackChunkName: "trip-plan" */ '../views/TripPlan.vue')
-  // }
+    ,{
+    path: '/attractions',
+    name: 'Attractions',
+    component: Attractions
+  },
+  {
+    path: '/attractions/:id',
+    name: 'AttractionDetail',
+    component: AttractionDetailView,
+  },
+  {
+    path: '/trip-plan',
+    name: 'TripPlan',
+    component: TripPlan,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/trip-plan/create',
+    name: 'TripPlanCreate',
+    component: TripPlanCreate,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/trip-plan/:id',
+    name: 'TripPlanDetail',
+    component: TripPlanDetail,
+    meta: { requiresAuth: true },
+    props: true
+  },
+  {
+      path: '/trip-plan/:id/edit',
+      name: 'TripPlanEdit',
+      component: TripPlanEdit,
+      meta: { requiresAuth: true },
+      props: true
+    },
+
+    // 여행 일정 수정 페이지 라우트
+    {
+      path: '/trip-plan/:planId/:scheduleId/edit',
+      name: 'TripScheduleEdit',
+      component: TripScheduleEdit,
+      meta: { requiresAuth: true }
+    },
+  {
+    path: '/trip-plan/:planId/create',
+    name: 'TripScheduleCreate',
+    component: TripScheduleCreate,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/find-id',
+    name: 'FindId',
+    component: FindIdView
+  },
+  {
+    path: '/find-password',
+    name: 'FindPassword',
+    component: FindPasswordView
+  }
 ]
 
 // Vue 3에서는 createRouter 함수 사용

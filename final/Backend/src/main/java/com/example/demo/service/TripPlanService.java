@@ -61,7 +61,7 @@ public class TripPlanService {
      * 여행 계획 저장
      */
     public TripPlanWithSnippetsDto saveTripPlan(TripPlanRequestDto dto, Integer userId) {
-        TripPlan tripPlan=dto.toEntity();
+        TripPlan tripPlan=dto.toEntity(); tripPlan.setBudget(0);
         User user=userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         user.addPlan(tripPlan);
         Integer id=tripPlanRepository.save(tripPlan).getId();
@@ -108,9 +108,10 @@ public class TripPlanService {
         Attraction attraction=attractionRepository.findById(dto.getNo()).orElseThrow(()-> new EntityNotFoundException("관광지를 찾을 수 없습니다."));
         snippet.setAttraction(attraction);
         tripPlan.addSnippet(snippet); snippet.setPlan(tripPlan);
+        tripPlan.setBudget(tripPlan.getBudget()+snippet.getPrice());
         tripSnippetRepository.save(snippet);
         AttractionSummaryDto attractionSummaryDto=AttractionSummaryDto.from(attraction);
-        return new TPsnippetResponseDto(dto.getPrice(), dto.getSchedule(), attractionSummaryDto);
+        return new TPsnippetResponseDto(dto.getPrice(), dto.getSchedule(), attractionSummaryDto, snippet.getCategory(), snippet.getDate());
     }
 
     /**
@@ -119,7 +120,7 @@ public class TripPlanService {
     public TPsnippetResponseDto getTripSnippet(Integer snippetId) {
         TripSnippet snippet=tripSnippetRepository.findById(snippetId).orElseThrow(()->new EntityNotFoundException("계획 스니펫이 없습니다"));
         AttractionSummaryDto attractionSummaryDto=AttractionSummaryDto.from(snippet.getAttraction());
-        return new TPsnippetResponseDto(snippet.getPrice(), snippet.getSchedule(), attractionSummaryDto);
+        return new TPsnippetResponseDto(snippet.getPrice(), snippet.getSchedule(), attractionSummaryDto, snippet.getCategory(), snippet.getDate());
     }
 
     /**
@@ -130,6 +131,7 @@ public class TripPlanService {
         TripPlan plan=snippet.getPlan();
         if(plan!=null) {
             plan.getSnippets().remove(snippet);
+            plan.setBudget(plan.getBudget()-snippet.getPrice());
         }
         snippet.setPlan(null);
         tripSnippetRepository.deleteById(snippetId);
@@ -145,10 +147,10 @@ public class TripPlanService {
             Attraction attraction=attractionRepository.findById(dto.getNo()).orElseThrow(()-> new EntityNotFoundException("관광지를 찾을 수 없습니다."));
             snippet.setAttraction(attraction);
             AttractionSummaryDto attractionSummaryDto=AttractionSummaryDto.from(attraction);
-            return new TPsnippetResponseDto(snippet.getPrice(), snippet.getSchedule(), attractionSummaryDto);
+            return new TPsnippetResponseDto(snippet.getPrice(), snippet.getSchedule(), attractionSummaryDto, snippet.getCategory(), snippet.getDate());
         }
         AttractionSummaryDto attractionSummaryDto=AttractionSummaryDto.from(snippet.getAttraction());
-        return new TPsnippetResponseDto(snippet.getPrice(), snippet.getSchedule(), attractionSummaryDto);
+        return new TPsnippetResponseDto(snippet.getPrice(), snippet.getSchedule(), attractionSummaryDto, snippet.getCategory(), snippet.getDate());
     }
 
     /**
@@ -160,7 +162,11 @@ public class TripPlanService {
         if (planOptional.isPresent()) {
             TripPlanResponseDto plan = TripPlanResponseDto.from(planOptional.get());
             List<TPsnippetSummaryDto> snippets = tripSnippetRepository.getTripSnippetSummaryById(planOptional.get());
-
+            for(TPsnippetSummaryDto snippet : snippets) {
+                Attraction attraction=attractionRepository.findById(snippet.getNo()).orElseThrow(()->new EntityNotFoundException("관광지를 조회할 수 없습니다."));
+                AttractionSummaryDto attractionSummaryDto=AttractionSummaryDto.from(attraction);
+                snippet.setAttraction(attractionSummaryDto);
+            }
             return new TripPlanWithSnippetsDto(plan, snippets);
         }
         else {
