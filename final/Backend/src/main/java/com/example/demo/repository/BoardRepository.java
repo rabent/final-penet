@@ -18,7 +18,7 @@ import com.example.demo.model.entity.User;
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Integer> {
     //게시판 리스트용 dto 페이징
-    @Query("SELECT new com.example.demo.model.dto.Board.BoardSummaryDto(b.id, b.title, b.hit, u.name, b.createdAt) FROM Board b join b.user u")
+    @Query("SELECT new com.example.demo.model.dto.Board.BoardSummaryDto(b.id, b.title, b.hit, u.name, b.createdAt) FROM Board b join b.user u ORDER BY b.createdAt DESC")
     Page<BoardSummaryDto> findAllForList(Pageable pageable);
 
     // 제목 검색 결과를 페이징하여 가져오기(10개씩으로 구현 필요)
