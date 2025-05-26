@@ -123,22 +123,6 @@ const loadPosts = async () => {
     posts.value = response.data.content;
     totalPosts.value = response.data.totalElements;
 
-    // 임시 데이터 (백엔드 연동 전까지 사용)
-    //const dummyPosts = [
-    //  { id: 10, title: '게시판 테스트 입니다', author: '관리자', createTime: '2025-05-18T12:00:00', viewCount: 42 },
-    //  { id: 9, title: '여행 정보 공유합니다', author: '여행자123', createTime: '2025-05-15T15:30:00', viewCount: 28 },
-    //  { id: 8, title: '제주도 맛집 추천해주세요', author: '맛집탐험가', createTime: '2025-05-10T09:45:00', viewCount: 76 },
-    //  { id: 7, title: '서울 근교 당일치기 여행', author: '주말여행러', createTime: '2025-05-08T18:12:00', viewCount: 35 },
-    //  { id: 6, title: '여름 휴가 계획 공유', author: '방학맞이', createTime: '2025-05-05T11:24:00', viewCount: 19 },
-    //  { id: 5, title: '해외여행 필수 준비물', author: '세계일주', createTime: '2025-05-03T14:08:00', viewCount: 88 },
-    //  { id: 4, title: '국내 캠핑장 추천', author: '캠핑러버', createTime: '2025-05-01T10:15:00', viewCount: 45 },
-    //  { id: 3, title: '혼자 떠나는 여행 꿀팁', author: '솔로트래블러', createTime: '2025-04-29T16:30:00', viewCount: 92 },
-    //  { id: 2, title: '가족 여행지 추천', author: '행복한가족', createTime: '2025-04-25T13:20:00', viewCount: 51 },
-    //  { id: 1, title: '첫 번째 공지사항입니다', author: '관리자', createTime: '2025-04-20T09:00:00', viewCount: 120 },
-    //];
-
-    //posts.value = dummyPosts;
-    //totalPosts.value = 23; // 총 23개의 게시글이 있다고 가정
   } catch (error) {
     console.error('게시글 로드 실패:', error);
   }

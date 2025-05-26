@@ -15,12 +15,12 @@
     <section class="featured-destinations">
       <h2>인기 여행지</h2>
       <div class="destination-grid">
-        <div class="destination-card" v-for="(destination, index) in featuredDestinations" :key="index">
-          <div class="destination-image" :style="{ backgroundImage: `url(${destination.image})` }"></div>
+        <div class="destination-card" v-for="(destination, index) in randomDestinations" :key="index">
+          <div class="destination-image" :style="{ backgroundImage: `url(${imageUrls[destination.name]})` }"></div>
           <div class="destination-info">
             <h3>{{ destination.name }}</h3>
             <p>{{ destination.description }}</p>
-            <router-link :to="`/attractions?location=${destination.id}`" class="view-more">
+            <router-link :to="{ path: `/attractions` , query: {location : destination.name}}" class="view-more">
               더 알아보기
             </router-link>
           </div>
@@ -33,7 +33,7 @@
       <div class="post-list">
         <div class="post-card" v-for="(post, index) in recentPosts" :key="index">
           <h3>{{ post.title }}</h3>
-          <p class="post-meta">{{ post.author }} · {{ post.date }}</p>
+          <p class="post-meta">{{ post.user }} · {{ post.createdAt }}</p>
           <p class="post-excerpt">{{ post.excerpt }}</p>
           <router-link :to="`/board/post/${post.id}`" class="read-more">
             자세히 보기
@@ -55,58 +55,188 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import api from '@/utils/axios'
+
+const loading = ref(true)
+const imageUrls = ref({})
+const errorMessage = ref('')
+
+const randomDestinations = computed(() => {
+  const shuffled = [...featuredDestinations.value].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, 3);
+});
 
 const featuredDestinations = ref([
-  {
-    id: 'jeju',
-    name: '제주도',
-    description: '아름다운 해변과 자연 경관을 자랑하는 한국의 대표적인 휴양지',
-    image: 'https://via.placeholder.com/400x300?text=제주도'
-  },
-  {
-    id: 'busan',
-    name: '부산',
-    description: '해운대 해변과 활기찬 시장이 있는 한국 제2의 도시',
-    image: 'https://via.placeholder.com/400x300?text=부산'
-  },
-  {
-    id: 'gyeongju',
-    name: '경주',
-    description: '신라 시대의 역사적 유적이 풍부한 역사 문화 도시',
-    image: 'https://via.placeholder.com/400x300?text=경주'
-  },
-  {
-    id: 'seoul',
-    name: '서울',
-    description: '전통과 현대가 공존하는 대한민국의 수도',
-    image: 'https://via.placeholder.com/400x300?text=서울'
-  }
+ {
+   id: 'jeju',
+   name: '제주도',
+   description: '아름다운 해변과 자연 경관을 자랑하는 한국의 대표적인 휴양지',
+ },
+ {
+   id: 'busan',
+   name: '부산',
+   description: '해운대 해변과 활기찬 시장이 있는 한국 제2의 도시',
+ },
+ {
+   id: 'seoul',
+   name: '서울',
+   description: '전통과 현대가 공존하는 대한민국의 수도',
+ },
+ {
+   id: 'chungbuk',
+   name: '충청북도',
+   description: '단양팔경과 속리산으로 유명한 내륙 산간 지역',
+ },
+ {
+   id: 'chungnam',
+   name: '충청남도',
+   description: '백제의 역사가 깃든 공주와 부여, 아름다운 서해안을 품은 지역',
+ },
+ {
+   id: 'daegu',
+   name: '대구',
+   description: '약령시와 팔공산으로 유명한 영남 지역의 중심 도시',
+ },
+ {
+   id: 'daejeon',
+   name: '대전',
+   description: '과학과 교육의 중심지이자 온천으로 유명한 충청권 거점 도시',
+ },
+ {
+   id: 'gangwon',
+   name: '강원특별자치도',
+   description: '설악산과 동해안의 아름다운 자연경관을 자랑하는 산과 바다의 고장',
+ },
+ {
+   id: 'gwangju',
+   name: '광주',
+   description: '예향의 도시로 불리며 풍부한 문화 예술과 맛있는 음식으로 유명한 호남 지역의 중심',
+ },
+ {
+   id: 'gyeonggi',
+   name: '경기도',
+   description: '수원 화성과 한국민속촌 등 다양한 관광지가 있는 서울 근교의 거대한 도시권',
+ },
+ {
+   id: 'gyeongbuk',
+   name: '경상북도',
+   description: '안동 하회마을과 경주 불국사 등 유네스코 세계문화유산이 풍부한 역사의 보고',
+ },
+ {
+   id: 'gyeongnam',
+   name: '경상남도',
+   description: '통영의 아름다운 바다와 하동의 차밭이 어우러진 남해안의 관광 명소',
+ },
+ {
+   id: 'incheon',
+   name: '인천',
+   description: '인천국제공항과 차이나타운, 월미도가 있는 서해안의 관문 도시',
+ },
+ {
+   id: 'jeonbuk',
+   name: '전북특별자치도',
+   description: '전주 한옥마을과 맛있는 비빔밥으로 유명한 한국 전통문화의 중심지',
+ },
+ {
+   id: 'jeonnam',
+   name: '전라남도',
+   description: '순천만 습지와 여수 밤바다로 유명한 남해안의 자연 생태 보고',
+ },
+ {
+   id: 'sejong',
+   name: '세종특별자치시',
+   description: '대한민국의 행정수도로 계획된 신도시이자 정부청사가 위치한 현대적 도시',
+ },
+ {
+   id: 'ulsan',
+   name: '울산',
+   description: '산업의 중심지이면서 태화강 십리대숲과 간절곶 해돋이로 유명한 동남권 도시',
+ }
 ])
 
-const recentPosts = ref([
-  {
-    id: 1,
-    title: '제주도 3박 4일 여행 후기',
-    author: '여행자123',
-    date: '2025-05-05',
-    excerpt: '제주도의 숨겨진 명소들과 현지인 맛집을 소개합니다.'
-  },
-  {
-    id: 2,
-    title: '혼자 떠나는 부산 여행 가이드',
-    author: '솔로트래블러',
-    date: '2025-05-03',
-    excerpt: '혼자서도 충분히 즐길 수 있는 부산 여행 코스를 정리했습니다.'
-  },
-  {
-    id: 3,
-    title: '가족과 함께하는 경주 여행 계획',
-    author: '행복한가족',
-    date: '2025-05-01',
-    excerpt: '아이들과 함께 역사 탐방을 할 수 있는 경주 여행 계획을 공유합니다.'
+const recentPosts = ref([])
+
+const fetchPosts = async () => {
+  try {
+      const response = await api.get('/boards/main')
+      recentPosts.value = response.data.content;
+    } catch (error) {
+      console.error('시도 목록 로딩 실패:', error)
+    }
+}
+
+const regionImageCounts = {
+  부산 : 3,
+  충청북도 : 3,
+  충청남도 : 3,
+  대구 : 3,
+  대전 : 3,
+  강원특별자치도 : 3,
+  광주 : 3,
+  경기도 : 3,
+  경상북도 : 3,
+  경상남도 : 3,
+  인천 : 3,
+  제주도 : 3,
+  전북특별자치도 : 3,
+  전라남도 : 3,
+  세종특별자치시 : 3,
+  서울 : 3,
+  울산 : 3
+}
+
+const getLocationImage = async (region) => {
+  loading.value = true
+  errorMessage.value = ''
+
+  try {
+    const imageCount = regionImageCounts[region] || 3
+    const randomIndex = Math.floor(Math.random() * imageCount) + 1
+
+    console.log(`Loading: ${region}_${randomIndex}.jpg`)
+
+    // 동적 import로 필요한 이미지만 로드
+    const module = await import(`@/assets/regions/${region}/${region}_${randomIndex}.jpg`)
+    return module.default
+
+  } catch (error) {
+    console.error(`이미지 로드 실패: ${region}`, error)
+    errorMessage.value = `${region} 이미지를 찾을 수 없습니다.`
+
+    // 기본 이미지 로드 시도
+    try {
+      const defaultModule = await import('@/assets/regions/default.jpg')
+      return defaultModule.default
+    } catch (defaultError) {
+      console.error('기본 이미지도 로드 실패:', defaultError)
+      return null
+    }
+  } finally {
+    loading.value = false
   }
-])
+}
+
+const fetchImage = async () => {
+                     // 반복문으로 각 지역의 이미지 로드
+                     const regions = Object.keys(regionImageCounts)
+                     for (const region of regions) {  // 👈 index 없이 in 사용
+                       try {
+                         const imageUrl = await getLocationImage(region)
+                         imageUrls.value[region] = imageUrl  // 지역명을 키로 저장
+                       } catch (error) {
+                         console.error(`${region} 이미지 로드 실패:`, error)
+                         imageUrls.value[region] = null
+                       }
+                     }
+                     loading.value = false
+                   }
+
+onMounted(() => {
+  fetchImage()
+  fetchPosts()
+})
+
 </script>
 
 <style scoped>
@@ -324,11 +454,11 @@ h2 {
   .hero h1 {
     font-size: 28px;
   }
-  
+
   .hero p {
     font-size: 16px;
   }
-  
+
   .destination-grid, .post-list {
     grid-template-columns: 1fr;
   }

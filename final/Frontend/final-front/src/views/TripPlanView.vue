@@ -48,10 +48,10 @@
         </div>
 
         <div class="plan-image" @click="goToDetail(plan.id,imageUrls[plan.location])">
-          <img :src="imageUrls[plan.location]" loading="lazy" :alt="plan.title" />
+          <img :src="imageUrls[plan.location]" loading="lazy" :alt="plan.planName" />
         </div>
         <div class="plan-content" @click="goToDetail(plan.id,imageUrls[plan.location])">
-          <h3 class="plan-title">{{ plan.title }}</h3>
+          <h3 class="plan-title">{{ plan.planName }}</h3>
           <p class="plan-description">{{ plan.description }}</p>
           <div class="plan-info">
             <div class="plan-dates">
