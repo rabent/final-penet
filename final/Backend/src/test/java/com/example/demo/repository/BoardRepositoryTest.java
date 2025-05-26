@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,7 +23,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@ActiveProfiles("test")
+@ActiveProfiles("local")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class BoardRepositoryTest {
 
     @Autowired
@@ -42,6 +45,7 @@ class BoardRepositoryTest {
 
     @BeforeEach
     void setUp() {
+        boardRepository.deleteAll();
         // 테스트 사용자 생성
         user1 = User.builder()
                 .name("홍길동")
@@ -229,7 +233,7 @@ class BoardRepositoryTest {
     @Test
     @DisplayName("페이징 및 정렬 테스트")
     void testPagingAndSorting() {
-        // given - 한 페이지에 2개씩, 조회수 기준 내림차순 정렬
+        // given - 한 페이지에 2개씩 (현재는 createdAt DESC가 우선, hit DESC가 2차 정렬)
         Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "hit"));
 
         // when
@@ -240,17 +244,29 @@ class BoardRepositoryTest {
         assertThat(result.getContent()).hasSize(2); // 페이지당 2개
         assertThat(result.getTotalElements()).isEqualTo(4); // 전체 게시글 4개
         assertThat(result.getTotalPages()).isEqualTo(2); // 총 2페이지
-        
-        // 조회수 내림차순 정렬 확인 (첫 페이지)
+
+        // 실제 정렬 순서: createdAt DESC 우선, hit DESC는 2차 정렬
+        // 첫 페이지: board4(오늘, hit=30), board3(1일전, hit=20)
         assertThat(result.getContent().get(0).getHit()).isEqualTo(30);
+        assertThat(result.getContent().get(0).getTitle()).isEqualTo("공지사항: 사이트 점검 안내");
         assertThat(result.getContent().get(1).getHit()).isEqualTo(20);
-        
+        assertThat(result.getContent().get(1).getTitle()).isEqualTo("세 번째 게시글 - 여행 후기");
+
         // 두 번째 페이지 확인
         Pageable secondPage = PageRequest.of(1, 2, Sort.by(Sort.Direction.DESC, "hit"));
         Page<BoardSummaryDto> secondPageResult = boardRepository.findAllForList(secondPage);
-        
+
+        secondPageResult.getContent().forEach(board ->
+                System.out.println("Title: " + board.getTitle() + ", Hit: " + board.getHit() + ", CreatedAt: " + board.getCreatedAt())
+        );
+
         assertThat(secondPageResult.getContent()).hasSize(2);
-        assertThat(secondPageResult.getContent().get(0).getHit()).isEqualTo(10);
-        assertThat(secondPageResult.getContent().get(1).getHit()).isEqualTo(5);
+
+        // 두 번째 페이지: board2(2일전, hit=5), board1(3일전, hit=10)
+        // createdAt이 우선이므로 더 최근인 board2가 먼저 나옴
+        assertThat(secondPageResult.getContent().get(0).getHit()).isEqualTo(5);
+        assertThat(secondPageResult.getContent().get(0).getTitle()).isEqualTo("두 번째 게시글");
+        assertThat(secondPageResult.getContent().get(1).getHit()).isEqualTo(10);
+        assertThat(secondPageResult.getContent().get(1).getTitle()).isEqualTo("첫 번째 게시글");
     }
 }

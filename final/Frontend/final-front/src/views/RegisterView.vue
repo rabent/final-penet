@@ -5,16 +5,34 @@
       <form @submit.prevent="handleRegister" class="register-form">
         <div class="form-group">
           <label for="email">이메일 (아이디)</label>
-          <input
-            type="email"
-            id="email"
-            v-model="registerForm.email"
-            required
-            maxlength="40"
-            placeholder="이메일을 입력하세요 (40자 이하)"
-          />
+          <div class="email-input-group">
+            <input
+              type="email"
+              id="email"
+              v-model="registerForm.email"
+              required
+              maxlength="40"
+              placeholder="이메일을 입력하세요 (40자 이하)"
+              @input="resetEmailCheck"
+            />
+            <button 
+              type="button" 
+              class="check-email-button"
+              @click="checkEmailDuplicate"
+              :disabled="!isValidEmail || !registerForm.email"
+            >
+              중복확인
+            </button>
+          </div>
           <span class="input-guide" v-if="!isValidEmail">
             올바른 이메일 형식이 아닙니다.
+          </span>
+          <span 
+            v-if="emailCheckMessage" 
+            class="email-check-result"
+            :class="{ 'success': !isDuplicateEmail, 'error': isDuplicateEmail }"
+          >
+            {{ emailCheckMessage }}
           </span>
         </div>
 
@@ -100,7 +118,7 @@
 <script setup>
 import { reactive, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'  // axios import 추가
+import api from '@/utils/axios'  // axios import 추가
 
 const router = useRouter()
 const passwordConfirm = ref('')
@@ -154,7 +172,33 @@ const isValidPassword = computed(() => {
     (registerForm.password.length >= 8 && registerForm.password.length <= 15)
 })
 
-// isFormValid에 새로운 조건 추가
+// 이메일 중복 확인 관련 상태 추가
+const isDuplicateEmail = ref(false)
+const emailChecked = ref(false)
+const emailCheckMessage = ref('')
+
+const resetEmailCheck = () => {
+  emailChecked.value = false
+  emailCheckMessage.value = ''
+}
+
+const checkEmailDuplicate = async () => {
+  try {
+    const response = await api.get('/auth/check-email', {
+      params: { email: registerForm.email }
+    })
+    isDuplicateEmail.value = response.data.isDuplicate
+    emailChecked.value = true
+    emailCheckMessage.value = isDuplicateEmail.value 
+      ? '이미 사용중인 이메일입니다.' 
+      : '사용 가능한 이메일입니다.'
+  } catch (error) {
+    console.error('이메일 중복 확인 실패:', error)
+    emailCheckMessage.value = '이메일 중복 확인 중 오류가 발생했습니다.'
+  }
+}
+
+// isFormValid computed 속성 수정
 const isFormValid = computed(() => {
   return registerForm.name &&
          registerForm.name.length <= 15 &&
@@ -168,7 +212,9 @@ const isFormValid = computed(() => {
          registerForm.address &&
          registerForm.address.length <= 50 &&
          registerForm.number &&
-         isValidPhoneNumber.value
+         isValidPhoneNumber.value &&
+         emailChecked.value && 
+         !isDuplicateEmail.value // 이메일 중복 체크 조건 추가
 })
 
 const handleRegister = async () => {
@@ -185,7 +231,7 @@ const handleRegister = async () => {
     }
 
     // API 호출
-    const response = await axios.post('http://localhost:8080/api/users', formData)
+    const response = await api.post('/users', formData)
 
     if (response.data) {
       alert('회원가입이 완료되었습니다.')
@@ -266,6 +312,27 @@ const handleRegister = async () => {
   outline: none;
 }
 
+.email-input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.check-email-button {
+  padding: 0 15px;
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.check-email-button:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
 .register-button {
   width: 100%;
   padding: 12px;
@@ -319,6 +386,20 @@ const handleRegister = async () => {
   display: block;
   margin-top: 5px;
   font-size: 14px;
+  color: #e74c3c;
+}
+
+.email-check-result {
+  display: block;
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+.email-check-result.success {
+  color: #27ae60;
+}
+
+.email-check-result.error {
   color: #e74c3c;
 }
 </style>

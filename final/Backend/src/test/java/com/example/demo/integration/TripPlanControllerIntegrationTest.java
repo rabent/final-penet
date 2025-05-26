@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -112,16 +113,22 @@ public class TripPlanControllerIntegrationTest {
                 .planName("테스트 여행 계획")
                 .plan("테스트 계획 내용")
                 .user(testUser)
+                .startDate("2025-01-13")
+                .endDate("2025-02-23")
+                .location("제주")
+                .budget(0)
                 .build();
         testPlan = tripPlanRepository.save(testPlan);
         testUser.getPlans().add(testPlan);
 
         // 테스트 여행 스니펫 생성
         testSnippet = TripSnippet.builder()
-                .price("10000원")
+                .price(10000)
                 .schedule("첫째 날 일정")
                 .plan(testPlan)
                 .attraction(testAttraction)
+                .category("관광")
+                .date("2025-01-23")
                 .build();
         testSnippet = tripSnippetRepository.save(testSnippet);
         testPlan.getSnippets().add(testSnippet);
@@ -153,6 +160,9 @@ public class TripPlanControllerIntegrationTest {
         Map<String, String> boardRequest = new HashMap<>();
         boardRequest.put("planName", "새 여행 계획");
         boardRequest.put("plan", "새 계획 내용입니다.");
+        boardRequest.put("startDate", "2025-01-13");
+        boardRequest.put("endDate", "2025-02-23");
+        boardRequest.put("location", "제주");
 
         // ObjectMapper를 사용하여 JSON 문자열로 변환
         ObjectMapper objectMapper = new ObjectMapper();
@@ -200,9 +210,11 @@ public class TripPlanControllerIntegrationTest {
     @Test
     void snippetPost_addsNewSnippetToPlan() throws Exception {
         Map<String, String> boardRequest = new HashMap<>();
-        boardRequest.put("price", "20000원");
+        boardRequest.put("price", "20000");
         boardRequest.put("schedule", "둘째 날 일정");
         boardRequest.put("no", testAttraction.getNo().toString());
+        boardRequest.put("category", "관광");
+        boardRequest.put("date", "2025-03-21");
 
         // ObjectMapper를 사용하여 JSON 문자열로 변환
         ObjectMapper objectMapper = new ObjectMapper();
@@ -213,7 +225,7 @@ public class TripPlanControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                         .with(authentication(authentication)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.price", is("20000원")))
+                .andExpect(jsonPath("$.price", is(20000)))
                 .andExpect(jsonPath("$.schedule", is("둘째 날 일정")))
                 .andExpect(jsonPath("$.attraction.title", is("테스트 관광지")));
     }
@@ -221,7 +233,7 @@ public class TripPlanControllerIntegrationTest {
     @Test
     void snippetUpdate_updatesExistingSnippet() throws Exception {
         Map<String, String> boardRequest = new HashMap<>();
-        boardRequest.put("price", "15000원");
+        boardRequest.put("price", "15000");
         boardRequest.put("schedule", "수정된 일정");
 
         // ObjectMapper를 사용하여 JSON 문자열로 변환
@@ -233,7 +245,7 @@ public class TripPlanControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                         .with(authentication(authentication)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.price", is("15000원")))
+                .andExpect(jsonPath("$.price", is(15000)))
                 .andExpect(jsonPath("$.schedule", is("수정된 일정")));
     }
 

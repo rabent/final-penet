@@ -7,7 +7,11 @@
       <router-view v-slot="{ Component }">
         <!-- Vue 3에서 추가된 transition 기능 (선택 사항) -->
         <transition name="fade" mode="out-in">
-          <component :is="Component" />
+          <keep-alive v-if="shouldKeepAlive" :include="['AttractionView']"
+          >
+            <component :is="Component" />
+          </keep-alive>
+          <component v-else :is="Component" />
         </transition>
       </router-view>
     </main>
@@ -15,7 +19,15 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import Header from './components/TheHeader.vue'
+
+const route = useRoute()
+
+const shouldKeepAlive = computed(() => {
+  return route.name === 'AttractionView' || route.path.includes('/attractions')
+})
 </script>
 
 <style>

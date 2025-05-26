@@ -4,9 +4,11 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
@@ -19,6 +21,8 @@ import com.example.demo.model.entity.TripPlan;
 import com.example.demo.model.entity.User;
 
 @DataJpaTest
+@ActiveProfiles("local")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class TripPlanRepositoryTest {
 
     @Autowired
@@ -66,25 +70,37 @@ class TripPlanRepositoryTest {
         tripPlan1 = TripPlan.builder()
                 .planName("제주도 3박 4일")
                 .plan("1일차: 제주공항 도착, 렌트카 수령, 성산일출봉\n2일차: 우도 투어\n3일차: 한라산 등반\n4일차: 올레시장, 귀가")
+                .startDate("2025-01-03")
+                .endDate("2025-02-03")
                 .user(user1)
+                .location("제주")
                 .build();
 
         tripPlan2 = TripPlan.builder()
                 .planName("부산 여행 계획")
                 .plan("1일차: KTX 타고 부산역, 해운대\n2일차: 광안리, 영도")
                 .user(user1)
+                .startDate("2025-01-03")
+                .endDate("2025-02-13")
+                .location("부산")
                 .build();
 
         tripPlan3 = TripPlan.builder()
                 .planName("도쿄 일본 여행")
                 .plan("1일차: 하네다 공항, 시부야\n2일차: 아사쿠사, 도쿄타워\n3일차: 디즈니랜드")
                 .user(user2)
+                .startDate("2025-01-23")
+                .endDate("2025-02-03")
+                .location("일본")
                 .build();
 
         tripPlan4 = TripPlan.builder()
                 .planName("강원도 속초 당일치기")
                 .plan("아침 일찍 출발, 중간에 휴게소 들렸다가 속초 도착, 저녁에 귀가")
                 .user(user2)
+                .startDate("2025-01-03")
+                .endDate("2025-02-23")
+                .location("강원")
                 .build();
 
         // 테스트 여행 계획 저장
