@@ -30,6 +30,39 @@
         ></textarea>
       </div>
 
+      <!-- 이미지 섹션 추가 -->
+      <div class="form-group">
+        <label>과거 이미지</label>
+        <div v-if="existingImages.length > 0" class="image-gallery">
+          <div v-for="(image, index) in existingImages" :key="index" class="image-item">
+            <img
+              :src="`http://localhost:8080/api/images/view/${image.fileName}`"
+              :alt="image.originalFileName"
+            />
+            <button type="button" @click="removeExistingImage(index)" class="remove-image">×</button>
+          </div>
+        </div>
+        <p v-else class="no-images">등록된 이미지가 없습니다.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="newImages">변경할 이미지 추가</label>
+        <input
+          type="file"
+          id="newImages"
+          @change="handleImageSelect"
+          accept="image/*"
+          multiple
+          class="file-input"
+        />
+        <div v-if="newImages.length > 0" class="image-gallery">
+          <div v-for="(image, index) in newImages" :key="index" class="image-item">
+            <img :src="image.previewUrl" :alt="image.file.name" />
+            <button type="button" @click="removeNewImage(index)" class="remove-image">×</button>
+          </div>
+        </div>
+      </div>
+
       <div class="form-actions">
         <button type="button" class="cancel-button" @click="goBack">취소</button>
         <button type="submit" class="submit-button" :disabled="!isFormValid || isSubmitting">
@@ -79,9 +112,10 @@ const loadPost = async () => {
     // 폼에 기존 게시글 데이터 설정
     postForm.title = postData.title;
     postForm.content = postData.content;
+    existingImages.value = postData.images || [];
 
     // 현재 사용자 ID 확인
-    const userId = response.data.userId;
+    const userId = response.data.authorId;
 
     // 현재 사용자가 작성자인지 확인
     if (postData.userId !== userId) {
@@ -111,17 +145,74 @@ const loadPost = async () => {
   }
 };
 
+// 이미지 관련 상태 추가
+const existingImages = ref([]);
+const newImages = ref([]);
+const removedImageFileNames = ref([]);
+
+// 이미지 선택 핸들러
+const handleImageSelect = (event) => {
+  const files = Array.from(event.target.files);
+  files.forEach(file => {
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        newImages.value.push({
+          file,
+          previewUrl: e.target.result
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+};
+
+// 기존 이미지 제거
+const removeExistingImage = (index) => {
+  const removedImage = existingImages.value[index];
+  removedImageFileNames.value.push(removedImage.fileName);
+  existingImages.value.splice(index, 1);
+};
+
+// 새 이미지 제거
+const removeNewImage = (index) => {
+  newImages.value.splice(index, 1);
+};
+
 // 게시글 수정 제출
 const submitPost = async () => {
-  if (!isFormValid.value) {
-    return;
-  }
+  if (!isFormValid.value) return;
 
   try {
     isSubmitting.value = true;
 
-    // API 호출로 게시글 수정
-    await api.put(`boards/edit/${postId}`, postForm);
+    // 1. 새 이미지 업로드
+    const uploadedFileNames = [];
+    for (const imageData of newImages.value) {
+      const formData = new FormData();
+      formData.append('file', imageData.file);
+
+      const imageResponse = await api.post('/images/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      if (imageResponse.data && imageResponse.data.fileName) {
+        uploadedFileNames.push(imageResponse.data.fileName);
+      }
+    }
+
+    // 2. 게시글 수정 요청 데이터 준비
+    const updateData = {
+      title: postForm.title,
+      content: postForm.content,
+      imageFileNames: [
+        // ...existingImages.value.map(img => img.fileName),
+        ...uploadedFileNames
+      ]
+    };
+
+    // 3. 게시글 수정 API 호출
+    await api.put(`boards/edit/${postId}`, updateData);
 
     alert('게시글이 수정되었습니다.');
     router.push(`/board/post/${postId}`);
@@ -260,6 +351,63 @@ onMounted(() => {
 .submit-button:disabled {
   background-color: #bdc3c7;
   cursor: not-allowed;
+}
+
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.image-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove-image {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.remove-image:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.file-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px dashed #ddd;
+  border-radius: 4px;
+  margin-top: 5px;
+}
+
+.no-images {
+  color: #666;
+  text-align: center;
+  padding: 20px;
+  background: #f5f5f5;
+  border-radius: 4px;
 }
 
 @media (max-width: 768px) {
