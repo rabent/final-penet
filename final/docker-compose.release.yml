@@ -3,6 +3,7 @@ services:
     build:
       context: ./Backend
       dockerfile: Dockerfile.test
+    image: rabent0207/final-penet-backend:latest
     container_name: spring-backend
     environment:
       - SPRING_PROFILES_ACTIVE=prod
@@ -24,6 +25,7 @@ services:
   frontend:
     build:
       context: ./Frontend/final-front
+    image: rabent0207/final-penet-frontend:latest
     container_name: vue-frontend
     restart: always
     ports:
