@@ -12,7 +12,7 @@ services:
       - DB_PASSWORD=ssafy
       - JWT_KEY=${JWT_KEY}
       - API_KEY=${API_KEY}
-      - cors.allowed.origins=${CORS_ALLOW}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOW}
     volumes:
       - gradle-cache:/root/.gradle
     restart: always
