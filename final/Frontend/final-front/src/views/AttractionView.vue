@@ -7,8 +7,8 @@
         <div class="search-bar">
           <div class="search-input-wrapper">
             <i class="fas fa-search search-icon"></i>
-            <input 
-              v-model="searchKeyword" 
+            <input
+              v-model="searchKeyword"
               placeholder="관광지를 검색해보세요"
               class="search-input"
               @keyup.enter="handleSearch"
@@ -17,8 +17,8 @@
           <button class="search-action-button" @click="handleSearch">
             검색
           </button>
-          <button 
-            class="filter-button" 
+          <button
+            class="filter-button"
             :class="{ active: isFilterOpen }"
             @click="isFilterOpen = !isFilterOpen"
           >
@@ -52,8 +52,8 @@
             <button
               v-for="gugun in guguns"
               :key="gugun.gugunCode"
-              :class="['gugun-button', { 
-                active: selectedGugun?.gugunCode === gugun.gugunCode 
+              :class="['gugun-button', {
+                active: selectedGugun?.gugunCode === gugun.gugunCode
               }]"
               @click="selectGugun(gugun)"
             >
@@ -101,16 +101,16 @@
         <div v-if="isLoading" class="loading-state">
           데이터를 불러오는 중...
         </div>
-        <div 
-          v-else-if="attractions.length === 0" 
+        <div
+          v-else-if="attractions.length === 0"
           class="empty-state"
         >
           검색 결과가 없습니다.
         </div>
-        <div 
+        <div
           v-else
-          v-for="place in attractions" 
-          :key="place.no" 
+          v-for="place in attractions"
+          :key="place.no"
           class="attraction-card"
           :class="{ active: selectedAttractionId === place.no }"
           @click="handleAttractionClick(place)"
@@ -130,7 +130,7 @@
           </div>
         </div>
         <div class="pagination">
-          <button 
+          <button
             class="page-button"
             :disabled="currentPage === 0"
             @click="handlePrevPage"
@@ -138,7 +138,7 @@
             <i class="fas fa-chevron-left"></i> 이전
           </button>
           <span class="page-info">{{ currentPage + 1 }} 페이지</span>
-          <button 
+          <button
             class="page-button"
             :disabled="!hasNextPage"
             @click="handleNextPage"
@@ -159,14 +159,14 @@
           @on-load-kakao-map="handleMapLoad"
           style="width: 100%; height: 100%;"
         >
-          <KakaoMapMarker 
+          <KakaoMapMarker
             v-for="place in attractions"
             :order = "place.title"
             :key="place.no"
             :lat = Number(place.latitude)
             :lng = Number(place.longitude)
             :clickable="true"
-            
+
             @on-click-kakao-map-marker="handleMarkerClick(place)"
           />
 
@@ -185,8 +185,8 @@
                       <h4>{{ selectedPlace?.title }}</h4>
                     </div>
                     <div class="overlay-image" v-if="selectedPlace?.firstImage1 || selectedPlace?.firstImage2">
-                      <img 
-                        :src="selectedPlace?.firstImage1 || selectedPlace?.firstImage2" 
+                      <img
+                        :src="selectedPlace?.firstImage1 || selectedPlace?.firstImage2"
                         alt="관광지 이미지"
                       />
                     </div>
@@ -209,7 +209,7 @@
               </div>
             </template>
           </KakaoMapCustomOverlay>
-        
+
         </KakaoMap>
       </div>
     </div>
@@ -220,9 +220,10 @@
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { KakaoMap, KakaoMapMarker,KakaoMapCustomOverlay } from 'vue3-kakao-maps'
 import api from '@/utils/axios'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
+const route=useRoute()
 
 const attractions = ref([])
 
@@ -253,7 +254,7 @@ const mapCenter = ref({
 })
 
 // map 인스턴스 참조를 위한 ref 추가
-const map = ref(null) 
+const map = ref(null)
 
 // 상태 추가
 const isOverlayVisible = ref(false)
@@ -263,26 +264,27 @@ const handleMapLoad = (mapInstance) => {
   map.value = mapInstance
 }
 
-const selectedPlace = computed(() => 
+const selectedPlace = computed(() =>
   attractions.value.find(place => place.no === selectedAttractionId.value)
 )
 
 // adjustMapBounds 함수 수정
-const adjustMapBounds = () => { 
+const adjustMapBounds = () => {
   if (!map.value || attractions.value.length === 0) return
   const bounds = new kakao.maps.LatLngBounds()
-  
+
   attractions.value.forEach(place => {
     bounds.extend(
       new kakao.maps.LatLng(
-        Number(place.latitude), 
+        Number(place.latitude),
         Number(place.longitude)
       )
     )
   })
-  
+
   map.value.setBounds(bounds)
 }
+
 
 // 검색 조건으로 관광지 조회 함수 수정
 const searchAttractions = async () => {
@@ -296,7 +298,7 @@ const searchAttractions = async () => {
       gugunCode: selectedGugun.value?.gugunCode || null,
       category: selectedCategory.value !== '전체' ? getCategoryCode(selectedCategory.value) : null
     }
-    
+
     const response = await api.get('/attractions/searchByFilter', { params })
     attractions.value = response.data.content
     totalPages.value = response.data.totalPages
@@ -335,7 +337,7 @@ const fetchGuguns = async (sidoCode) => {
       guguns.value = []
       return
     }
-    
+
     const response = await api.get('/attractions/guguns')
     // 선택된 시도코드와 일치하는 구군만 필터링
     guguns.value = response.data.filter(gugun => gugun.sidoCode === sidoCode)
@@ -483,6 +485,8 @@ onMounted(async () => {
       fetchContentTypes()
     ])
     // 관광지 데이터 로딩
+    selectedSido.value=route.query.location
+     await nextTick()
     await searchAttractions()
   } catch (error) {
     console.error('초기 데이터 로딩 실패:', error)
