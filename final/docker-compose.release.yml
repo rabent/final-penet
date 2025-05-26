@@ -7,11 +7,11 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SERVER_PORT=8080
-      - DB_HOST=172.31.43.49
+      - DB_HOST=172.31.45.114
       - DB_PORT=3306
       - DB_NAME=ssafy
       - DB_USERNAME=ssafy
-      - DB_PASSWORD=ssafy1234
+      - DB_PASSWORD=ssafy
       - JWT_KEY=
       - API_KEY=
     volumes:
