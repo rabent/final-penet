@@ -29,7 +29,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         //api 관련 예외 처리
-                        .requestMatchers("/auth/**","/users","/boards","/boards/{boardId}", "/attractions/**","/ai/**").permitAll()
+                        .requestMatchers("/auth/**","/users","/boards","/boards/{boardId}", "/attractions/**","/ai/**","/images/**").permitAll()
                         //swagger 관련 예외 처리
                         .requestMatchers("/swagger-ui.html").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
