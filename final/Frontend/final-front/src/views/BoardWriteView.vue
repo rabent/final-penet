@@ -26,6 +26,25 @@
         ></textarea>
       </div>
 
+      <div class="form-group">
+        <label for="images">이미지 첨부</label>
+        <input
+          type="file"
+          id="images"
+          @change="handleImageSelect"
+          accept="image/*"
+          multiple
+          class="file-input"
+        />
+        <div class="preview-container" v-if="imagePreviewUrls.length > 0">
+          <div v-for="(item, index) in imageItems" :key="index" class="preview-item">
+            <img :src="item.previewUrl" alt="Preview" class="preview-image" />
+            <span class="file-name">{{ item.fileName }}</span>
+            <button type="button" @click="removeImage(index)" class="remove-button">✕</button>
+          </div>
+        </div>
+      </div>
+
       <div class="form-actions">
         <button type="button" class="cancel-button" @click="goBack">취소</button>
         <button type="submit" class="submit-button" :disabled="!isFormValid">등록</button>
@@ -35,7 +54,7 @@
 </template>
 
 <script setup>
-import { reactive, computed, onMounted } from 'vue';
+import { reactive, computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/utils/axios';
 
@@ -65,6 +84,37 @@ onMounted(() => {
   postForm.userId = userId;
 });
 
+// 이미지 관련 상태 수정
+const selectedFiles = ref([]);
+const imagePreviewUrls = ref([]);
+const imageItems = ref([]); // 이미지 정보를 저장할 배열
+
+// 이미지 선택 핸들러 수정
+const handleImageSelect = (event) => {
+  const files = Array.from(event.target.files);
+  files.forEach(file => {
+    if (file.type.startsWith('image/')) {
+      selectedFiles.value.push(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreviewUrls.value.push(e.target.result);
+        imageItems.value.push({
+          fileName: file.name,
+          previewUrl: e.target.result
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+};
+
+// 이미지 제거 함수 수정
+const removeImage = (index) => {
+  selectedFiles.value.splice(index, 1);
+  imagePreviewUrls.value.splice(index, 1);
+  imageItems.value.splice(index, 1);
+};
+
 // 게시글 등록
 const submitPost = async () => {
   try {
@@ -72,20 +122,41 @@ const submitPost = async () => {
       return;
     }
 
-    // 실제 환경에서는 API 호출
-    const response = await api.post('http://localhost:8080/api/boards', postForm);
+    // 1. 이미지 업로드
+    const imageFileNames = [];
+    for (const file of selectedFiles.value) {
+      const formData = new FormData();
+      formData.append('file', file);
 
-    // TODO: 백엔드 API 완성 후 주석 해제
-    if (response.data) {
-       alert('게시글이 등록되었습니다.');
-       router.push('/board');
+      const imageResponse = await api.post('/images/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (imageResponse.data && imageResponse.data.fileName) {
+        imageFileNames.push(imageResponse.data.fileName);
+      }
     }
 
-    // 백엔드 연동 전까지는 성공했다고 가정
-    //alert('게시글이 등록되었습니다.');
-    //router.push('/board');
+    // 2. 게시글 데이터 준비
+    const boardData = {
+      ...postForm,
+      imageFileNames: imageFileNames
+    };
+
+    // 3. 게시글 등록
+    const response = await api.post('/boards', boardData);
+
+    if (response.data) {
+      alert('게시글이 등록되었습니다.');
+      router.push('/board');
+    }
   } catch (error) {
     console.error('게시글 등록 실패:', error);
+    if (error.response) {
+      console.error('에러 상세:', error.response.data);
+    }
     alert('게시글 등록에 실패했습니다.');
   }
 };
@@ -184,6 +255,67 @@ const goBack = () => {
 .submit-button:disabled {
   background-color: #bdc3c7;
   cursor: not-allowed;
+}
+
+.file-input {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.preview-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.preview-item {
+  position: relative;
+  width: 150px; /* 너비 증가 */
+  margin-bottom: 20px; /* 아래 여백 추가 */
+}
+
+.file-name {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.remove-button {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.remove-button:hover {
+  background-color: #c0392b;
 }
 
 @media (max-width: 768px) {
