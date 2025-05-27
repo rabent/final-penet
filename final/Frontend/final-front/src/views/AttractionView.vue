@@ -486,6 +486,7 @@ onMounted(async () => {
     ])
     // 관광지 데이터 로딩
     selectedSido.value=route.query.location
+     searchKeyword.value=route.query.keyword
      await nextTick()
     await searchAttractions()
   } catch (error) {

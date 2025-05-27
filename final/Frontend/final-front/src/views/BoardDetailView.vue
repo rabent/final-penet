@@ -26,6 +26,30 @@
         <p v-for="(paragraph, index) in contentParagraphs" :key="index">
           {{ paragraph }}
         </p>
+
+        <!-- 이미지 갤러리 추가 -->
+        <div v-if="post.images && post.images.length > 0" class="image-gallery">
+          <div v-for="(image, index) in post.images" :key="index" class="image-item">
+            <img
+              :src="`http://localhost:8080/api/images/view/${image.fileName}`"
+              :alt="`게시글 이미지 ${index + 1}`"
+              @error="handleImageError"
+              @click="openImageModal(image)"
+              class="gallery-image"
+            />
+          </div>
+        </div>
+
+        <!-- 이미지 모달 -->
+        <div v-if="selectedImage" class="image-modal" @click="closeImageModal">
+          <div class="modal-content" @click.stop>
+            <img
+              :src="`http://localhost:8080/api/images/view/${selectedImage.fileName}`"
+              :alt="selectedImage.originalFileName"
+            />
+            <button class="modal-close" @click="closeImageModal">&times;</button>
+          </div>
+        </div>
       </div>
 
       <div class="post-actions">
@@ -107,7 +131,9 @@ const contentParagraphs = computed(() => {
 
 // 현재 사용자가 게시글 작성자인지 확인
 const isAuthor = computed(() => {
-  return currentUserId.value && post.value.userId === currentUserId.value;
+  console.log('현재 사용자:', currentUserId.value);
+  console.log('게시글 작성자:', post.value.authorId);
+  return currentUserId.value && post.value.authorId === currentUserId.value;
 });
 
 // 게시글 불러오기
@@ -116,11 +142,14 @@ const loadPost = async () => {
     isLoading.value = true;
     error.value = null;
 
-    // 실제 환경에서는 API 호출
-     const response = await api.get(`boards/${postId}`);
-     post.value = response.data.board;
-     currentUserId.value=response.data.userId;
-     isLoading.value = false;
+    const response = await api.get(`boards/${postId}`);
+    post.value = response.data.board;
+    currentUserId.value = response.data.userId;
+
+    console.log('게시글 데이터:', post.value); // 디버깅용
+    console.log('현재 로그인한 사용자 ID:', currentUserId.value); // 디버깅용
+
+    isLoading.value = false;
   } catch (err) {
     console.error('게시글 로드 실패:', err);
     error.value = '게시글을 불러오는 중 오류가 발생했습니다.';
@@ -132,7 +161,7 @@ const loadPost = async () => {
 const loadComments = async () => {
   try {
     // 실제 환경에서는 API 호출
-    // const response = await axios.get(`http://localhost:8080/api/boards/${postId}/comments`);
+    // const response = await axios.get(`/boards/${postId}/comments`);
     // comments.value = response.data;
 
     // 임시 데이터 (백엔드 연동 전까지 사용)
@@ -221,6 +250,10 @@ const deleteComment = async (commentId) => {
 
 // 게시글 수정 페이지로 이동
 const editPost = () => {
+  if (!isAuthor.value) {
+    alert('게시글 작성자만 수정할 수 있습니다.');
+    return;
+  }
   router.push(`/board/edit/${postId}`);
 };
 
@@ -269,6 +302,28 @@ const formatDate = (dateString) => {
 
   // 그 외 날짜는 YYYY-MM-DD HH:MM 형식으로 표시
   return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+};
+
+// 이미지 로드 실패 처리 수정
+const handleImageError = (event) => {
+  console.error('이미지 로드 실패:', event.target.src);
+  // 이미지 로드 실패 시 해당 이미지 컨테이너를 숨김
+  event.target.parentElement.style.display = 'none';
+};
+
+// 이미지 모달 관련 상태
+const selectedImage = ref(null);
+
+// 이미지 모달 열기
+const openImageModal = (image) => {
+  selectedImage.value = image;
+  document.body.style.overflow = 'hidden'; // 모달 열릴 때 스크롤 방지
+};
+
+// 이미지 모달 닫기
+const closeImageModal = () => {
+  selectedImage.value = null;
+  document.body.style.overflow = 'auto'; // 모달 닫힐 때 스크롤 복구
 };
 
 // 컴포넌트 마운트 시 실행
@@ -404,7 +459,9 @@ onMounted(() => {
 }
 
 .comment-form {
-  margin-bottom: 30px;
+  margin-bottom: 40px;  /* 30px에서 40px로 증가 */
+  position: relative;   /* 추가 */
+  padding-bottom: 10px; /* 추가 */
 }
 
 .comment-input {
@@ -429,7 +486,9 @@ onMounted(() => {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  float: right;
+  position: absolute;  /* 변경 */
+  right: 0;           /* 추가 */
+  bottom: -10px;      /* 추가 */
 }
 
 .comment-submit:hover {
@@ -447,6 +506,7 @@ onMounted(() => {
   color: #888;
   background-color: #f9f9f9;
   border-radius: 4px;
+  margin-top: 20px;  /* 추가 */
 }
 
 .comment {
@@ -495,6 +555,90 @@ onMounted(() => {
   text-decoration: underline;
 }
 
+.image-gallery {
+  margin: 20px 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 10px;
+}
+
+.image-item {
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.image-item img:hover {
+  transform: scale(1.05);
+}
+
+/* 이미지 모달 스타일 */
+.gallery-image {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.gallery-image:hover {
+  transform: scale(1.05);
+}
+
+.image-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  position: relative;
+  max-width: 90%;
+  max-height: 90vh;
+}
+
+.modal-content img {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.modal-close {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 30px;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  color: #ddd;
+}
+
 @media (max-width: 768px) {
   .post-detail {
     padding: 20px;
@@ -522,6 +666,16 @@ onMounted(() => {
   .edit-button,
   .delete-button {
     flex: 1;
+  }
+
+  .image-gallery {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+  }
+
+  .modal-close {
+    top: -30px;
+    right: 0;
   }
 }
 </style>
