@@ -82,7 +82,7 @@ onMounted(async () => {
   }
 
   try {
-    const response = await api.get(`http://localhost:8080/api/users/${userId.value}`, {
+    const response = await api.get(`/users/${userId.value}`, {
       headers: {
         Authorization: sessionStorage.getItem('token')
       }
@@ -123,7 +123,7 @@ const saveUserInfo = async (updatedUser) => {
       number: formatPhoneNumber(updatedUser.number)
     }
 
-    await api.put(`http://localhost:8080/api/users/${userId.value}`, formattedUser, {
+    await api.put(`/users/${userId.value}`, formattedUser, {
       headers: {
         Authorization: sessionStorage.getItem('token')
       }
@@ -143,7 +143,7 @@ const saveUserInfo = async (updatedUser) => {
 // 회원 탈퇴
 const deleteAccount = async () => {
   try {
-    await api.delete(`http://localhost:8080/api/users/${userId.value}`, {
+    await api.delete(`/users/${userId.value}`, {
       headers: {
         Authorization: sessionStorage.getItem('token')
       }

@@ -120,7 +120,7 @@ public class BoardControllerIntegrationTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.board.title", is("테스트 게시글")))
                 .andExpect(jsonPath("$.board.content", is("테스트 내용입니다.")))
-                .andExpect(jsonPath("$.board.username", is("테스트 사용자")));
+                .andExpect(jsonPath("$.board.authorName", is("테스트 사용자")));
     }
 
     @Test

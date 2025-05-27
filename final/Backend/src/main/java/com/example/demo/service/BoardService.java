@@ -12,6 +12,7 @@ import com.example.demo.repository.BoardRepository;
 import com.example.demo.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -97,7 +98,7 @@ public class BoardService {
      */
     public BoardResponseDto getBoardDetail(Integer id) {
         Board board=boardRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
-        incrementHit(board);
+        board.setHit(board.getHit()+1);
         return BoardResponseDto.from(board);
     }
 
@@ -219,10 +220,5 @@ public class BoardService {
                 bImageRepository.save(bImage);
             }
         }
-    }
-
-    @Transactional
-    private void incrementHit(Board board) {
-        board.setHit(board.getHit() + 1);
     }
 }
