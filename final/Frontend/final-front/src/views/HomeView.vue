@@ -4,7 +4,7 @@
     <section class="hero">
       <div class="hero-content">
         <h1>여행의 즐거움을 발견하세요</h1>
-        <p>EnjoyTrip과 함께 새로운 여행지를 탐색하고, 여행 계획을 세우고, 경험을 공유하세요.</p>
+        <p>HamGaja과 함께 새로운 여행지를 탐색하고, 여행 계획을 세우고, 경험을 공유하세요.</p>
         <div class="search-container">
           <input v-model="searchTerm" type="text" placeholder="어디로 떠나고 싶으신가요?" class="search-input" @keyup.enter="handleSearch"/>
           <button class="search-button" @click="handleSearch">검색</button>
@@ -45,7 +45,7 @@
     <section class="cta-section">
       <div class="cta-content">
         <h2>나만의 여행 계획을 만들어보세요</h2>
-        <p>EnjoyTrip의 여행 계획 도구로 손쉽게 여행 일정을 만들고 관리하세요.</p>
+        <p>Hamgaja의 여행 계획 도구로 손쉽게 여행 일정을 만들고 관리하세요.</p>
         <router-link to="/trip-plan" class="cta-button">
           여행 계획 시작하기
         </router-link>
