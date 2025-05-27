@@ -3,7 +3,7 @@
   <header class="header">
     <div class="header-container">
       <div class="header-left">
-        <h1 class="site-title"><router-link to="/">EnjoyTrip</router-link></h1>
+        <h1 class="site-title"><router-link to="/">HamGaja</router-link></h1>
         <nav class="main-nav">
           <ul>
             <li><router-link to="/attractions">관광지 검색</router-link></li>
