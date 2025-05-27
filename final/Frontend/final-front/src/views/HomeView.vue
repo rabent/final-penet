@@ -6,8 +6,8 @@
         <h1>여행의 즐거움을 발견하세요</h1>
         <p>EnjoyTrip과 함께 새로운 여행지를 탐색하고, 여행 계획을 세우고, 경험을 공유하세요.</p>
         <div class="search-container">
-          <input type="text" placeholder="어디로 떠나고 싶으신가요?" class="search-input" />
-          <button class="search-button">검색</button>
+          <input v-model="searchTerm" type="text" placeholder="어디로 떠나고 싶으신가요?" class="search-input" @keyup.enter="handleSearch"/>
+          <button class="search-button" @click="handleSearch">검색</button>
         </div>
       </div>
     </section>
@@ -56,16 +56,26 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '@/utils/axios'
 
 const loading = ref(true)
 const imageUrls = ref({})
 const errorMessage = ref('')
+const searchTerm=ref('')
+const router = useRouter()
 
 const randomDestinations = computed(() => {
   const shuffled = [...featuredDestinations.value].sort(() => 0.5 - Math.random());
   return shuffled.slice(0, 3);
 });
+
+const handleSearch = () => {
+    const keyword = String(searchTerm.value || '').trim();
+            if (keyword) {
+                router.push({ path: `/attractions` , query: {keyword : keyword}});
+            }
+        }
 
 const featuredDestinations = ref([
  {
