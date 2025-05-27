@@ -218,7 +218,7 @@ public class BoardServiceTest {
     void saveBoard() {
         // given
         Integer userId = 1;
-        BoardRequestDto newBoard=new BoardRequestDto(null, null);
+        BoardRequestDto newBoard=new BoardRequestDto(null, null,null);
         newBoard.setTitle("새 게시글");
         newBoard.setContent("새 내용");
         Board resBoard=new Board();
@@ -248,7 +248,7 @@ public class BoardServiceTest {
     void saveBoard_UserNotFound() {
         // given
         Integer userId = 999;
-        BoardRequestDto newBoard=new BoardRequestDto(null, null);
+        BoardRequestDto newBoard=new BoardRequestDto(null, null, null);
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         // when & then
