@@ -96,6 +96,7 @@ public class BoardService {
     /**
      * 게시글 상세 조회
      */
+    @Transactional
     public BoardResponseDto getBoardDetail(Integer id) {
         Board board=boardRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
         board.setHit(board.getHit()+1);
