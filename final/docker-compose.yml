@@ -16,6 +16,12 @@ services:
       # 필요한 환경변수 추가 (DB 설정 등)
     env_file:
       - .env
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/api/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   frontend:
     build:
@@ -30,6 +36,12 @@ services:
       - backend
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "netstat -an | grep :8080 | grep LISTEN || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   prometheus:
     image: prom/prometheus
@@ -39,6 +51,14 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - app-network
+    healthcheck:
+      # 포트 체크
+      test: ["CMD-SHELL", "netstat -an | grep :9090 | grep LISTEN || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
 
   grafana:
     image: grafana/grafana
@@ -48,6 +68,13 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     networks:
       - app-network
+    healthcheck:
+      # 포트 체크
+      test: ["CMD-SHELL", "netstat -an | grep :3000 | grep LISTEN || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 volumes:
   gradle-cache:  # 도커 관리 볼륨 정의
