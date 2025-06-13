@@ -2,7 +2,8 @@
 name: Debug Domain Resolution
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ feat/#65-github-action-cd ]
 
 jobs:
   debug-dns:
