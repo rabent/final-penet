@@ -2,7 +2,7 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile.test
+      dockerfile: Backend/Dockerfile
     container_name: spring-backend
     volumes:
       - gradle-cache:/root/.gradle  # Gradle 캐시 볼륨

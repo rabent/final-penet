@@ -2,7 +2,7 @@ services:
   backend:
     build:
       context: ./Backend
-      dockerfile: Dockerfile.test
+      dockerfile: Backend/Dockerfile
     image: rabent0207/final-penet-backend:latest
     container_name: spring-backend
     environment:
