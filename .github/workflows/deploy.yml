@@ -51,7 +51,7 @@ jobs:
       - name: Build and push Frontend Docker image
         uses: docker/build-push-action@v6
         with:
-          context: ./final/Frontend
+          context: ./final/Frontend/final-front
           push: true
           tags: rabent0207/final-penet-frontend:latest
 
@@ -62,6 +62,6 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ubuntu/your-project-directory
+            cd /home/ubuntu/Hamgaja/final
             docker compose -f docker-compose.server.yml pull
             docker compose -f docker-compose.server.yml up -d
