@@ -62,6 +62,6 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ubuntu/Hamgaja/final
+            cd /home/ubuntu/Hamgaja
             docker compose -f docker-compose.server.yml pull
             docker compose -f docker-compose.server.yml up -d
