@@ -1,0 +1,88 @@
+# .github/workflows/debug-domain.yml
+name: Debug Domain Resolution
+
+on:
+  workflow_dispatch:
+
+jobs:
+  debug-dns:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test DuckDNS domain resolution
+        run: |
+          echo "=== DuckDNS 도메인 해석 테스트 ==="
+          
+          # 1. 기본 nslookup
+          echo "1. 기본 nslookup:"
+          nslookup hamgaja.duckdns.org || echo "❌ 기본 nslookup 실패"
+          
+          # 2. Google DNS로 테스트
+          echo "2. Google DNS (8.8.8.8):"
+          nslookup hamgaja.duckdns.org 8.8.8.8 || echo "❌ Google DNS 실패"
+          
+          # 3. Cloudflare DNS로 테스트
+          echo "3. Cloudflare DNS (1.1.1.1):"
+          nslookup hamgaja.duckdns.org 1.1.1.1 || echo "❌ Cloudflare DNS 실패"
+          
+          # 4. dig 명령어로 상세 확인
+          echo "4. dig 상세 확인:"
+          dig hamgaja.duckdns.org || echo "❌ dig 실패"
+          
+          # 5. ping 테스트
+          echo "5. ping 테스트 (3회):"
+          ping -c 3 hamgaja.duckdns.org || echo "❌ ping 실패"
+          
+          # 6. curl로 HTTP 테스트
+          echo "6. HTTP 연결 테스트:"
+          curl -I --connect-timeout 10 http://hamgaja.duckdns.org || echo "❌ HTTP 연결 실패"
+
+      - name: Test with different DNS servers
+        run: |
+          echo "=== DNS 서버 변경 테스트 ==="
+          
+          # DNS 서버를 Google DNS로 변경
+          echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
+          echo "nameserver 8.8.4.4" | sudo tee -a /etc/resolv.conf
+          
+          echo "변경된 DNS 설정:"
+          cat /etc/resolv.conf
+          
+          # 변경 후 테스트
+          echo "DNS 변경 후 테스트:"
+          nslookup hamgaja.duckdns.org || echo "❌ DNS 변경 후에도 실패"
+
+      - name: Test SSH port connectivity
+        run: |
+          echo "=== SSH 포트 연결 테스트 ==="
+          
+          # IP 주소 확인
+          IP=$(nslookup hamgaja.duckdns.org 8.8.8.8 | grep -A1 "Name:" | tail -1 | awk '{print $2}' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$')
+          
+          if [ -n "$IP" ]; then
+            echo "해석된 IP: $IP"
+          
+            # IP로 SSH 포트 테스트
+            echo "IP로 SSH 포트 연결 테스트:"
+            timeout 10 nc -zv $IP 22 || echo "❌ SSH 포트 연결 실패"
+          
+            # 도메인으로 SSH 포트 테스트
+            echo "도메인으로 SSH 포트 연결 테스트:"
+            timeout 10 nc -zv hamgaja.duckdns.org 22 || echo "❌ 도메인 SSH 포트 연결 실패"
+          else
+            echo "❌ IP 주소 해석 완전 실패"
+          fi
+
+      - name: Compare with working domain
+        run: |
+          echo "=== 정상 도메인과 비교 테스트 ==="
+          
+          # 잘 알려진 도메인 테스트
+          echo "Google.com 테스트:"
+          nslookup google.com
+          
+          echo "GitHub.com 테스트:"
+          nslookup github.com
+          
+          # 다른 DuckDNS 도메인 테스트
+          echo "다른 DuckDNS 도메인 테스트:"
+          nslookup test.duckdns.org || echo "다른 DuckDNS 도메인도 실패"
