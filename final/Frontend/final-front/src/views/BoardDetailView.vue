@@ -31,7 +31,7 @@
         <div v-if="post.images && post.images.length > 0" class="image-gallery">
           <div v-for="(image, index) in post.images" :key="index" class="image-item">
             <img
-              :src="`http://localhost:8080/api/images/view/${image.fileName}`"
+              :src="`/api/images/view/${image.fileName}`"
               :alt="`게시글 이미지 ${index + 1}`"
               @error="handleImageError"
               @click="openImageModal(image)"
@@ -44,7 +44,7 @@
         <div v-if="selectedImage" class="image-modal" @click="closeImageModal">
           <div class="modal-content" @click.stop>
             <img
-              :src="`http://localhost:8080/api/images/view/${selectedImage.fileName}`"
+              :src="`/api/images/view/${selectedImage.fileName}`"
               :alt="selectedImage.originalFileName"
             />
             <button class="modal-close" @click="closeImageModal">&times;</button>
