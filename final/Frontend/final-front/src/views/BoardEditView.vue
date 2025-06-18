@@ -36,7 +36,7 @@
         <div v-if="existingImages.length > 0" class="image-gallery">
           <div v-for="(image, index) in existingImages" :key="index" class="image-item">
             <img
-              :src="`http://localhost:8080/api/images/view/${image.fileName}`"
+              :src="`/api/images/view/${image.fileName}`"
               :alt="image.originalFileName"
             />
             <button type="button" @click="removeExistingImage(index)" class="remove-image">×</button>
