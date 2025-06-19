@@ -1,8 +1,8 @@
 services:
   backend:
     build:
-      context: ./backend
-      dockerfile: Backend/Dockerfile
+      context: ./Backend
+      dockerfile: Dockerfile
     container_name: spring-backend
     volumes:
       - gradle-cache:/root/.gradle  # Gradle 캐시 볼륨
@@ -29,8 +29,11 @@ services:
     container_name: vue-frontend
     restart: unless-stopped
     ports:
-      - "8080:8080"  # 외부 8080 포트를 컨테이너 80 포트에 매핑
+      - "8080:8080"
+      - "80:80"    # HTTP
+      - "443:443"  # HTTPS
     volumes:
+      - ./frontend/final-front/ssl:/etc/ssl:ro  # 읽기 전용으로 마운트
       - ./frontend/final-front/nginx.conf:/etc/nginx/nginx.conf # Nginx 설정 마운트
     depends_on:
       - backend

@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+/final/Frontend/final-front/ssl/privkey.pem
+/final/Frontend/final-front/ssl/fullchain.pem
+/final/Frontend/final-front/ssl/chain.pem
+/final/Frontend/final-front/ssl/cert.pem
