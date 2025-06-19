@@ -26,8 +26,10 @@ services:
     container_name: vue-frontend
     restart: always
     ports:
-      - "80:8080"
+      - "80:80"
+      - "443:443"
     volumes:
+      - ./ssl:/etc/ssl:ro  # 읽기 전용으로 마운트
       - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - backend
