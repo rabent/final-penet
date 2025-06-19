@@ -33,7 +33,7 @@ services:
     ports:
       - "8080:8080"  # 외부 8080 포트를 컨테이너 80 포트에 매핑
     volumes:
-      - ./Frontend/final-front/nginx.conf:/etc/nginx/nginx.conf # Nginx 설정 마운트
+      - ./Frontend/final-front/nginx.server.conf:/etc/nginx/nginx.conf # Nginx 설정 마운트
     depends_on:
       - backend
     networks:

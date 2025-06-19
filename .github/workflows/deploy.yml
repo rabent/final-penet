@@ -63,5 +63,17 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ubuntu/Hamgaja
+            mkdir -p ssl
+      
+            cat > ssl/fullchain.pem << 'EOF'
+            ${{ secrets.SSL_FULLCHAIN }}
+            EOF
+      
+            cat > ssl/privkey.pem << 'EOF'
+            ${{ secrets.SSL_PRIVATE }}
+            EOF
+      
+            chmod 644 frontend/final-front/ssl/fullchain.pem
+            chmod 600 frontend/final-front/ssl/privkey.pem
             docker compose -f docker-compose.server.yml pull
             docker compose -f docker-compose.server.yml up -d
